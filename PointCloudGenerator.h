@@ -33,8 +33,8 @@ public:
 	for(int i = 0; i < count; i++) {
 	    Point<D> p;
 	    for(int d = 0; d < D; d++) {
-		int min = bounds[d*D];
-		int max = bounds[d*D + 1];
+		int min = bounds[d*2];
+		int max = bounds[d*2 + 1];
 		p[d] = randomFloat(min, max);
 	    }
 	    points.push_back(p);

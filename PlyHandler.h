@@ -125,9 +125,9 @@ public:
 	//if(D == 3) myfile << "property float z\n";
 	
 	
-	myfile << "property uchar r\n";
-	myfile << "property uchar g\n";
-	myfile << "property uchar b\n";
+	myfile << "property uchar diffuse_red\n";
+	myfile << "property uchar diffuse_green\n";
+	myfile << "property uchar diffuse_blue\n";
 	myfile << "end_header\n";
 	
 	for(typename vector< Point<D> >::iterator it = data.begin(); it != data.end(); ++it) {

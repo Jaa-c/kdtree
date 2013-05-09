@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>KDTree.h</itemPath>
       <itemPath>PlyHandler.h</itemPath>
       <itemPath>Point.h</itemPath>
       <itemPath>PointCloudGenerator.h</itemPath>
@@ -45,11 +46,14 @@
           </incDir>
         </cTool>
         <ccTool>
+          <standard>8</standard>
           <incDir>
             <pElem>lib</pElem>
           </incDir>
         </ccTool>
       </compileType>
+      <item path="KDTree.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PlyHandler.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Point.h" ex="false" tool="3" flavor2="0">
@@ -80,6 +84,8 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="KDTree.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PlyHandler.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Point.h" ex="false" tool="3" flavor2="0">
