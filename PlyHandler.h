@@ -108,7 +108,7 @@ public:
     }
     
     template<const int D>
-    static void save(string file, vector< Point<D> > data) {
+    static void savePoints(string file, vector< Point<D> > data) {
 	if(D > 3 || D < 2) 
 	    return;
 	
@@ -137,6 +137,51 @@ public:
 	    else myfile << " 0";
 	    
 	    myfile << " " << p.color[0] << " "<< p.color[1] << " "<< p.color[2] << "\n";
+	}
+	
+	myfile.close();
+    }
+    
+    template<const int D>
+    static void saveLines(string file, vector< Point<D> > data) {
+	if(D > 3 || D < 2) 
+	    return;
+	
+	cout << "saving " << data.size() << " points to " << file << "\n";
+	
+	ofstream myfile;
+	myfile.open(file.c_str());
+	
+	myfile << "ply\nformat ascii 1.0\n";
+	myfile << "element vertex " << data.size() << "\n";
+	myfile << "property float x\n";
+	myfile << "property float y\n";
+	myfile << "property float z\n";
+	myfile << "property uchar diffuse_red\n";
+	myfile << "property uchar diffuse_green\n";
+	myfile << "property uchar diffuse_blue\n";
+	
+	myfile << "element edge " << data.size()/2 << "\n";
+	myfile << "property int vertex1\n";
+	myfile << "property int vertex2\n";	
+	myfile << "property uchar diffuse_red\n";
+	myfile << "property uchar diffuse_green\n";
+	myfile << "property uchar diffuse_blue\n";
+	
+	myfile << "end_header\n";
+	
+	for(typename vector< Point<D> >::iterator it = data.begin(); it != data.end(); ++it) {
+	    Point<D> p = *it;
+	    myfile << p[0] << " " << p[1];
+	    if(D == 3) myfile << " " << p[2];
+	    else myfile << " 0";
+	    
+	    myfile << " " << p.color[0] << " "<< p.color[1] << " "<< p.color[2] << "\n";
+	}
+	
+	for(int i = 0; i < data.size(); i+=2) {
+	    myfile << i << " " << i+1 << " ";
+	    myfile << "255 255 255\n";
 	}
 	
 	myfile.close();

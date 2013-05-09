@@ -1,4 +1,4 @@
-/* 
+/* d
  * File:   Point.h
  * Author: jaa
  *
@@ -16,6 +16,12 @@ struct Point {
     
     Point() {
 	color[0] = color[1] = color[2] = 0;
+    }
+    
+    Point(float* co) {
+	for(int i = 0; i < D; i++) {
+	    coords[i] = co[i];
+	}
     }
     
     float& operator[](int idx) {

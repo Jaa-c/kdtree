@@ -1,6 +1,6 @@
 /* 
  * File:   KDTree.h
- * Author: jaa
+ * Author: Daniel Princ
  *
  */
 
@@ -94,9 +94,12 @@ class KDTree {
 	    if(left.size() > bucketSize) {
 		Inner *node = new Inner();
 		parent->left = node;
-		bounds[2*dim + 1] = split;
-		construct(&left, bounds, node);
-		bounds[2*dim + 1] += size/2.0f;
+		
+		float b[2*D];
+		std::copy(bounds, bounds + 2*D, &b[0]);
+		b[2*dim + 1] = split;
+		construct(&left, &b[0], node);
+		
 	    }
 	    else {
 		Leaf<D> * leaf = new Leaf<D>(left);
@@ -108,9 +111,11 @@ class KDTree {
 	    if(right.size() > bucketSize) {
 		Inner *node = new Inner();
 		parent->right = node;
-		bounds[2*dim] = split;
-		construct(&right, bounds, node);
-		bounds[2*dim] += size/2.0f;
+		
+		float b[2*D];
+		std::copy(bounds, bounds + 2*D, &b[0]);
+		b[2*dim] = split;
+		construct(&right, &b[0], node);
 	    }
 	    else {
 		Leaf<D> * leaf = new Leaf<D>(right);
@@ -124,8 +129,6 @@ public:
 	
     KDTree() {}
     ~KDTree() {
-	if(root.left) delete root.left;
-	if(root.right) delete root.right;
     }
     
     /**
@@ -153,21 +156,26 @@ public:
      * makes sense only in 2D
      */
     void debugTree() {
+	if(D != 2) return;
 	srand((unsigned)std::time(0)); 
-	vector< Point<D> > data = debugTree(&root);
-	PlyHandler::save<D>("data/debug.ply", data);
+	vector< Point<D> > data = debugBuckets(&root);
+	PlyHandler::savePoints<D>("data/debug.ply", data);
+	
+	float bounds[2*D] = {0.f, 1.f, 0.f, 2.f};
+	data = debugTree(&root, bounds);
+	PlyHandler::saveLines<D>("data/lines.ply", data);
     }
-    vector< Point<D> > debugTree(Inner* node) {
+    vector< Point<D> > debugBuckets(const Inner* node) {
 	vector< Point<D> > data;
 	if(node->left) {
 	    
 	    if(!node->left->isLeaf()) {
-		vector< Point<D> > d = debugTree((Inner *) node->left);
+		vector< Point<D> > d = debugBuckets((Inner *) node->left);
 		data.insert(data.end(), d.begin(), d.end());
 	    }
 	    else {
 		Leaf<D> * l = (Leaf<D> *) node->left;
-		int r = 0;//rand() % 255;
+		int r = rand() % 255;
 		int g = rand() % 255;
 		int b = rand() % 255;
 		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
@@ -183,14 +191,14 @@ public:
 	}
 	if(node->right) {
 	    if(!node->right->isLeaf()) {
-		vector< Point<D> > d = debugTree((Inner *) node->right);
+		vector< Point<D> > d = debugBuckets((Inner *) node->right);
 		data.insert(data.end(), d.begin(), d.end());
 	    }
 	    else {
 		Leaf<D> * l = (Leaf<D> *) node->right;
 		int r = rand() % 255;
 		int g = rand() % 255;
-		int b = 0;//rand() % 255;
+		int b = rand() % 255;
 		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
 		    Point<D> p;
 		    p.coords[0] = (*it)->coords[0];
@@ -204,9 +212,43 @@ public:
 	}
 	return data;
     }
+    vector< Point<D> > debugTree(const Inner* node, float* bound) {
+	vector< Point<D> > data;
+	Point<D> p1;
+	p1[0] = bound[0];
+	p1[1] = bound[2];
+	p1[node->dimension] = node->split;
+	p1.color[0] = 255;
+	p1.color[1] = 255;
+	p1.color[2] = 255;
+	
+	Point<D> p2;
+	p2[0] = bound[1];
+	p2[1] = bound[3];
+	p2[node->dimension] = node->split;
+	p2.color[0] = 255;
+	p2.color[1] = 255;
+	p2.color[2] = 255;
+	
+	data.push_back(p1);
+	data.push_back(p2);
+	if(!node->left->isLeaf()) {
+	    int temp = bound[2*node->dimension + 1];
+	    bound[2*node->dimension + 1] = node->split;
+	    vector< Point<D> > d = debugTree((Inner *) node->left, bound);
+	    data.insert(data.end(), d.begin(), d.end());
+	    bound[2*node->dimension + 1] = temp;
+	}
+	
+	if(!node->right->isLeaf()) {
+	    bound[2*node->dimension] = node->split;
+	    vector< Point<D> > d = debugTree((Inner *) node->right, bound);
+	    data.insert(data.end(), d.begin(), d.end());
+	}
+	return data;
+    }
 
 };
 
 
 #endif	/* KDTREE_H */
-
