@@ -24,6 +24,18 @@ struct Point {
 	}
     }
     
+    Point(const Point<D> & point) {
+	std::copy(point.coords, point.coords + D, coords);
+	std::copy(point.color, point.color + 3, color);
+    }
+    
+    Point& operator= (const Point<D> & point) {
+	Point tmp(point);
+	std::swap(coords, tmp.coords);
+	std::swap(color, tmp.color);
+	return *this;
+    }
+    
     float& operator[](int idx) {
 	return coords[idx];
     }

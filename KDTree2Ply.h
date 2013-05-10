@@ -27,13 +27,13 @@ public:
      * Saves points, every bucket in different color
      * makes sense only in 2D
      */
-    static void saveTree2Ply(const KDTree<2> *tree, const float * bounds) {
+    static void saveTree2Ply(const KDTree<2> *tree, const float * bounds, string name = "") {
 	srand((unsigned)std::time(0)); 
 	vector< Point<2> > data = debugBuckets(tree->getRoot());
-	PlyHandler::savePoints<2>("data/points.ply", data);
+	PlyHandler::savePoints<2>("data/" + name + "points.ply", data);
 	
 	data = debugTree(tree->getRoot(), bounds);
-	PlyHandler::saveLines<2>("data/lines.ply", data);
+	PlyHandler::saveLines<2>("data/" + name + "lines.ply", data);
     }
     
 private:

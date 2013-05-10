@@ -11,11 +11,17 @@
 #include <cstdlib>
 #include <vector>
 
+
+struct Inner;
+
 /**
  * Parent of nodes, can't be instantiated
  *  
  */
 struct Node {
+    
+    /** Pointer to parent node */
+    Inner * parent;
     
     /** Returns true if node is leaf */
     const bool isLeaf() const {
@@ -24,7 +30,7 @@ struct Node {
     
 protected:
     /** Constructor for child classes */
-    Node(const bool leaf) : leaf(leaf) {}
+    Node(const bool leaf, Inner* parent) : leaf(leaf), parent(parent) {}
 
 private:
     const bool leaf;
@@ -45,7 +51,7 @@ struct Inner : Node {
     Node* left;
     Node* right;
     
-    Inner() : Node(false), left(NULL), right(NULL) {}
+    Inner(Inner *parent) : Node(false, parent), left(NULL), right(NULL) {}
     ~Inner() {
 	if(left) delete left;
 	if(right) delete right;
@@ -61,7 +67,7 @@ template<const int D = 3>
 struct Leaf : Node {
     std::vector< const Point<D>* > bucket;
     
-    Leaf(std::vector< const Point<D>* > bucket) : Node(true), bucket(bucket) {}
+    Leaf(Inner *parent, std::vector< const Point<D>* > bucket) : Node(true, parent), bucket(bucket) {}
     ~Leaf() {}
 };
 

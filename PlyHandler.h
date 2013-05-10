@@ -44,8 +44,9 @@ class PlyHandler {
     }
 
 public:
-    static vector< Point<3> > load(string file) {
-	vector< Point<3> > data;
+    template<const int D>
+    static vector< Point<D> > load(string file) {
+	vector< Point<D> > data;
 	ifstream infile(file.c_str());
 	string line;
 	if(getline(infile, line)) {
@@ -84,20 +85,25 @@ public:
 	for(int i = 0; i < vertices; i++) {
 	    getline(infile, line);
 	    istringstream iss(trim(line));
-	    Point<3> p;
+	    Point<D> p;
 	    float x;
-	    if (!(iss >> p[0] >> p[1] >> p[2])) {
-		cout << "a";
+	    if (!(iss >> p[0] >> p[1])) {
 		break;
+	    }
+	    if(D == 3) {
+		if (!(iss >> p[2])) {
+		    break;
+		}
+	    }
+	    else {
+		iss >> x;
 	    }
 	    if (!(iss >> x >> x >> x)) {
-		cout << "b";
 		break;
 	    }
-	    if (!(iss >> p.color[0] >> p.color[1] >> p.color[2])) {
-		cout << "c";
-		break;
-	    }
+//	    if (!(iss >> p.color[0] >> p.color[1] >> p.color[2])) {
+//		break;
+//	    }
 	    data.push_back(p);
 	}
 	infile.close();
