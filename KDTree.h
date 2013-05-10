@@ -111,118 +111,17 @@ public:
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
      */
     void construct(const points * data, float * bounds) {
-	
 	construct(data, bounds, &root);
-	
     }
-    
-    
-    
-    
-    
     
     /**
-     * Saves points, every bucket in different color
-     * makes sense only in 2D
+     * Returns the root of the tree
+     * @return pointer to the root node
      */
-    void debugTree() {
-	if(D != 2) return;
-	srand((unsigned)std::time(0)); 
-	vector< Point<D> > data = debugBuckets(&root);
-	PlyHandler::savePoints<D>("data/debug.ply", data);
-	
-	float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};
-	data = debugTree(&root, bounds);
-	PlyHandler::saveLines<D>("data/lines.ply", data);
+    const Inner *getRoot() const {
+	return &root;
     }
-    vector< Point<D> > debugBuckets(const Inner* node) {
-	vector< Point<D> > data;
-	if(node->left) {
-	    
-	    if(!node->left->isLeaf()) {
-		vector< Point<D> > d = debugBuckets((Inner *) node->left);
-		data.insert(data.end(), d.begin(), d.end());
-	    }
-	    else {
-		Leaf<D> * l = (Leaf<D> *) node->left;
-		int r = rand() % 255;
-		int g = rand() % 255;
-		int b = rand() % 255;
-		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
-		    Point<D> p;
-		    p.coords[0] = (*it)->coords[0];
-		    p.coords[1] = (*it)->coords[1];
-		    p.color[0] = r;
-		    p.color[1] = g;
-		    p.color[2] = b;
-		    data.push_back(p);
-		}
-	    }
-	}
-	if(node->right) {
-	    if(!node->right->isLeaf()) {
-		vector< Point<D> > d = debugBuckets((Inner *) node->right);
-		data.insert(data.end(), d.begin(), d.end());
-	    }
-	    else {
-		Leaf<D> * l = (Leaf<D> *) node->right;
-		int r = rand() % 255;
-		int g = rand() % 255;
-		int b = rand() % 255;
-		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
-		    Point<D> p;
-		    p.coords[0] = (*it)->coords[0];
-		    p.coords[1] = (*it)->coords[1];
-		    p.color[0] = r;
-		    p.color[1] = g;
-		    p.color[2] = b;
-		    data.push_back(p);
-		}
-	    }
-	}
-	return data;
-    }
-    vector< Point<D> > debugTree(const Inner* node, float* bound) {
-	vector< Point<D> > data;
-	Point<D> p1;
-	p1[0] = bound[0];
-	p1[1] = bound[2];
-	p1[node->dimension] = node->split;
-	p1.color[0] = 255;
-	p1.color[1] = 255;
-	p1.color[2] = 255;
-	
-	Point<D> p2;
-	p2[0] = bound[1];
-	p2[1] = bound[3];
-	p2[node->dimension] = node->split;
-	p2.color[0] = 255;
-	p2.color[1] = 255;
-	p2.color[2] = 255;
-	
-	data.push_back(p1);
-	data.push_back(p2);
-	if(!node->left->isLeaf()) {
-	    
-	    float b[2*D];
-	    std::copy(bound, bound + 2*D, &b[0]);
-	    b[2*node->dimension + 1] = node->split;
-	    vector< Point<D> > d = debugTree((Inner *) node->left, &b[0]);
-	    data.insert(data.end(), d.begin(), d.end());
-	}
-	
-	if(!node->right->isLeaf()) {
-	    
-	    float b[2*D];
-	    std::copy(bound, bound + 2*D, &b[0]);
-	    b[2*node->dimension] = node->split;
-	    vector< Point<D> > d = debugTree((Inner *) node->right, &b[0]);
-	    data.insert(data.end(), d.begin(), d.end());
-	}
-	return data;
-    }
-
+    
 };
-
 
 #endif	/* KDTREE_H */

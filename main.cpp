@@ -9,6 +9,7 @@
 #include <iostream>
 #include "PointCloudGenerator.h"
 #include "PlyHandler.h"
+#include "KDTree2Ply.h"
 #include "KDTree.h"
 
 using namespace std;
@@ -29,7 +30,9 @@ int main(int argc, char *argv[]) {
     
     KDTree<D> kdtree;
     kdtree.construct(&pointers, &bounds[0]);
-    kdtree.debugTree();
+    
+    KDTree2Ply::saveTree2Ply(&kdtree, &bounds[0]);
+    
     
     return 0;
 }
