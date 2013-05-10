@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>KDTree.h</itemPath>
+      <itemPath>KDTreeNodes.h</itemPath>
       <itemPath>PlyHandler.h</itemPath>
       <itemPath>Point.h</itemPath>
       <itemPath>PointCloudGenerator.h</itemPath>
@@ -54,6 +55,8 @@
       </compileType>
       <item path="KDTree.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="KDTreeNodes.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="PlyHandler.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Point.h" ex="false" tool="3" flavor2="0">
@@ -85,6 +88,8 @@
         </asmTool>
       </compileType>
       <item path="KDTree.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="KDTreeNodes.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="PlyHandler.h" ex="false" tool="3" flavor2="0">
       </item>

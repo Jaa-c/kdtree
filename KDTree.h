@@ -11,36 +11,7 @@
 
 using namespace std;
 #include "Point.h"
-
-struct Node {
-    bool leaf;
-    bool isLeaf() {
-	return leaf;
-    }
-protected:
-    Node(bool leaf) : leaf(leaf) {}
-};
-
-struct Inner : Node {
-    unsigned char dimension;
-    float split;
-    Node* left;
-    Node* right;
-    
-    Inner() : Node(false), left(NULL), right(NULL) {}
-    ~Inner() {
-	if(left) delete left;
-	if(right) delete right;
-    }
-};
-
-template<const int D = 3>
-struct Leaf : Node {
-    vector< const Point<D>* > bucket;
-    
-    Leaf(vector< const Point<D>* > bucket) : Node(true), bucket(bucket) {}
-    ~Leaf() {}
-};
+#include "KDTreeNodes.h"
 
 template<const int D = 3>
 class KDTree {
@@ -48,7 +19,7 @@ class KDTree {
     typedef vector< const Point<D>* > points;
     typedef typename vector< const Point<D>* >::const_iterator points_it;
     
-    const static int bucketSize = 16;
+    const static int bucketSize = 8;
     
     Inner root;
     
@@ -150,7 +121,6 @@ public:
     
     
     
-    
     /**
      * Saves points, every bucket in different color
      * makes sense only in 2D
@@ -161,7 +131,7 @@ public:
 	vector< Point<D> > data = debugBuckets(&root);
 	PlyHandler::savePoints<D>("data/debug.ply", data);
 	
-	float bounds[2*D] = {0.f, 1.f, 0.f, 2.f};
+	float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};
 	data = debugTree(&root, bounds);
 	PlyHandler::saveLines<D>("data/lines.ply", data);
     }
@@ -233,16 +203,20 @@ public:
 	data.push_back(p1);
 	data.push_back(p2);
 	if(!node->left->isLeaf()) {
-	    int temp = bound[2*node->dimension + 1];
-	    bound[2*node->dimension + 1] = node->split;
-	    vector< Point<D> > d = debugTree((Inner *) node->left, bound);
+	    
+	    float b[2*D];
+	    std::copy(bound, bound + 2*D, &b[0]);
+	    b[2*node->dimension + 1] = node->split;
+	    vector< Point<D> > d = debugTree((Inner *) node->left, &b[0]);
 	    data.insert(data.end(), d.begin(), d.end());
-	    bound[2*node->dimension + 1] = temp;
 	}
 	
 	if(!node->right->isLeaf()) {
-	    bound[2*node->dimension] = node->split;
-	    vector< Point<D> > d = debugTree((Inner *) node->right, bound);
+	    
+	    float b[2*D];
+	    std::copy(bound, bound + 2*D, &b[0]);
+	    b[2*node->dimension] = node->split;
+	    vector< Point<D> > d = debugTree((Inner *) node->right, &b[0]);
 	    data.insert(data.end(), d.begin(), d.end());
 	}
 	return data;

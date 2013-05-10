@@ -16,7 +16,7 @@ using namespace std;
 #define D 2
 
 int main(int argc, char *argv[]) {
-    float bounds[2*D] = {0.f, 1.f, 0.f, 2.f};
+    float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};
     PointCloudGenerator<D> pcg;
     vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
     vector< const Point<D>* > pointers;
