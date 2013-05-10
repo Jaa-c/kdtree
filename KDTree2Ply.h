@@ -1,6 +1,6 @@
 /* 
  * File:   KDTree2Ply.h
- * Author: jaa
+ * Author: Daniel Princ
  *
  * Created on 10. květen 2013, 3:24
  */

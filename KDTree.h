@@ -105,13 +105,29 @@ public:
     /**
      *  Builds the KD-Tree on a given set of points
      * 
-     * @param[in] data array of points
+     * @param[in] data vector of pointers to points
      * @param[in] dataSize size od given array
      * @param[in] bounds array with bounds of the coordinates \
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
      */
     void construct(const points * data, float * bounds) {
 	construct(data, bounds, &root);
+    }
+    
+    /**
+     *  Builds the KD-Tree on a given set of points
+     * 
+     * @param[in] data vector of  points
+     * @param[in] dataSize size od given array
+     * @param[in] bounds array with bounds of the coordinates \
+     *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
+     */
+    void construct(const vector< Point<D> > * data, float * bounds) {
+	vector< const Point<D>* > pointers;
+	for(typename vector< Point<D> >::const_iterator it = data->begin(); it != data->end(); ++it) {
+	    pointers.push_back(&(*it));
+	}
+	construct(&pointers, bounds);
     }
     
     /**
