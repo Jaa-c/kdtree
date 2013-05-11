@@ -22,13 +22,10 @@ using namespace std;
  */
 template<const int D = 3>
 class KDTree {
-    
-    /** Status of nodes during NN search */
-    enum Visited {RIGHT, LEFT, BOTH, NONE};
-    
+        
     typedef vector< Point<D> *> points;
     typedef typename vector< Point<D> *>::iterator points_it;
-    typedef pair<Inner *, Visited> exInner;
+    typedef pair<Inner *, Visited> exInner; //DEPRECATED
     
     /** Size of the bucket*/
     const static int bucketSize = 8;
@@ -141,13 +138,16 @@ class KDTree {
      * @param p2
      * @return 
      */
-    inline const float distance(const Point<D> * p1, const Point<D> * p2) {
+    inline const float distance(const Point<D> * p1, const Point<D> * p2, bool sqrtb = true) {
 	float dist = 0;
 	for(int d = 0; d < D; d++) {
 	    float tmp = abs((*p1)[d] - (*p2)[d]);
 	    dist += tmp*tmp;
 	}
-	return sqrt(dist);
+	if(sqrtb)
+	    return sqrt(dist);
+	else
+	    return dist;
     }
     
     
@@ -207,6 +207,188 @@ public:
      * @return nearest neigbor
      */
     Point<D> * nearestNeighbor(const Point<D> *query) {
+	Leaf<D> *leaf = findBucket(query);
+	float dist = numeric_limits<float>::max();
+	Point<D> * nearest;
+	
+	//find nearest point in the bucket
+	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
+	    (*it)->setColor(0, 255, 0);
+	    float tmp = distance(query, *it);
+	    if(tmp < dist && tmp > 0) { //ie points are not the same!
+		dist = tmp;
+		nearest = *it;
+	    }
+	}
+	
+	//create initial window
+	float window[2*D];
+	for(int d = 0; d < D; d++) {
+	    window[2*d] = (*query)[d] - dist;
+	    window[2*d + 1] = (*query)[d] + dist;
+	}	
+	//cout << window[0] << " " << window[1]<< " " << window[2]<< " " << window[3] << "\n";
+	//PlyHandler::saveWindow<D>(window);
+	
+	ExtendedNode<D> n(leaf->parent);
+	if((Leaf<D> *)leaf->parent->left == leaf)
+	    n.status = LEFT;
+	else
+	    n.status = RIGHT;
+	
+	stack< ExtendedNode<D> > stack; //avoid recursion
+	stack.push(n);
+	
+	while(!stack.empty()) { //check possible nodes
+	    ExtendedNode<D> exNode = stack.top();
+	    stack.pop();
+	    
+	    ExtendedNode<D> left(exNode.tn);
+	    ExtendedNode<D> right(exNode.tn);
+	    
+	    
+	    if(exNode.node->right && (exNode.status != RIGHT || exNode.status == NONE)) {
+		right.tn.set(exNode.node->dimension, abs(exNode.node->split - (*query)[exNode.node->dimension]));
+		if(right.tn.getLength() < dist) {
+		    right.node = (Inner *)exNode.node->right;
+		}
+	    }
+
+	    if(exNode.node->left && (exNode.status != LEFT || exNode.status == NONE)) {
+		left.tn.set(exNode.node->dimension, abs(exNode.node->split - (*query)[exNode.node->dimension]));
+		if(left.tn.getLength() < dist) {
+		    left.node = (Inner *) exNode.node->left;
+		}
+	    }
+	    
+	    for(int i = 0; i < 2; i++) {
+		ExtendedNode<D> exN;
+		if(i == 0) exN = left;
+		else exN = right;
+		
+		if(exN.node) { //check node 
+		    if(exN.node->isLeaf()) {
+			points bucket = ((Leaf<D> *) exN.node)->bucket;
+			for(points_it it = bucket.begin(); it != bucket.end(); ++it) {
+			    (*it)->setColor(255, 255, 0);
+			    float tmp = distance(query, *it);
+			    if(tmp < dist && tmp > 0) { //ie points are not the same!
+				dist = tmp;
+				nearest = *it;
+				for(int d = 0; d < D; d++) {
+				    window[2*d] = (*query)[d] - dist;
+				    window[2*d + 1] = (*query)[d] + dist;
+				}
+			    }
+			}
+		    }
+		    else {
+			//Not leaf, add Node to the stack
+			stack.push(exN);
+		    }
+		}
+	    }
+	    
+	    //on my way up && not in root
+	    if(exNode.status != NONE && exNode.node->parent) {
+		ExtendedNode<D> add(exNode.node->parent, exNode.tn);
+		
+		if((Inner *) exNode.node->parent->right == exNode.node) 
+		    add.status = RIGHT;
+		else
+		    add.status = LEFT;
+
+		stack.push(add);	
+	    }
+	}
+	
+	return nearest;
+    }
+    
+    
+    /**
+     * Inserts point into the tree
+     * @param point point to insert
+     */
+    void insert(Point<D> *point) { //TODO: insert to empty tree
+	Leaf<D> * leaf = findBucket(point);
+	if(leaf->bucket.size() < bucketSize) {
+	    leaf->bucket.push_back(point);
+	    return; //OK, bucket is not full yet
+	}
+	else { //split the bucket into 2 new leaves
+	    points data(leaf->bucket);
+	    data.push_back(point); //add the point to bucket
+	    //create new inner node
+	    Inner * node = new Inner(leaf->parent);
+	    if((Leaf<D> *)leaf->parent->left == leaf) {
+		leaf->parent->left = node;
+	    }
+	    else if((Leaf<D> *)leaf->parent->right == leaf) {
+		leaf->parent->right = node;
+	    }
+	    else {
+		cerr << "somethig is very wrong! Point not inserted.\n";
+		return;
+	    }
+	    delete leaf; //no longer necessary
+	    
+	    //split the nodes along the dimension with greatest local variance
+	    Point<D> min = *(data[0]);
+	    Point<D> max = *(data[0]);
+	    for(points_it it = data.begin(); it != data.end(); ++it) {
+		Point<D> p = *(*it);
+		for(int d = 0; d < D; d++) {
+		    if(p[d] < min[d]) {
+			min[d] = p[d];
+			continue;
+		    }
+		    if(p[d] > max[d]) {
+			max[d] = p[d];
+		    }
+		}
+	    }
+	    int dim;
+	    float dist = 0;
+	    for(int d = 0; d < D; d++) {
+		if(max[d] - min[d] > dist) {
+		    dist = max[d] - min[d];
+		    dim = d;
+		}
+	    }
+	    node->split = min[dim] + dist / 2.0f;
+	    
+	    points l, r; //split the data
+	    for(points_it it = data.begin(); it != data.end(); ++it) {
+		Point<D> p = *(*it);
+		if(p[dim] <= node->split) {
+		    l.push_back(*it);
+		}
+		if(p[dim] > node->split) {
+		    r.push_back(*it);
+		}
+	    }
+	    
+	    //create two new leaves
+	    Leaf<D> * left = new Leaf<D>(node, l);
+	    node->left = left;
+	    
+	    Leaf<D> * right = new Leaf<D>(node, r);
+	    node->right = right;
+	    
+	}
+    }
+    
+    
+    /**
+     * !! This is just to compare the performance with the better version !!
+     * 
+     * Returns the exact nearest neighbor (NN).
+     * If there are more NNs, method retuns one random.
+     * @param query the point whose NN we search
+     * @return nearest neigbor
+     */
+    Point<D> * simpleNearestNeighbor(const Point<D> *query) {
 	Leaf<D> *leaf = findBucket(query);
 	float dist = numeric_limits<float>::max();
 	Point<D> * nearest;
@@ -300,80 +482,6 @@ public:
 	}
 	
 	return nearest;
-    }
-    
-    
-    /**
-     * Inserts point into the tree
-     * @param point point to insert
-     */
-    void insert(Point<D> *point) { //TODO: insert to empty tree
-	Leaf<D> * leaf = findBucket(point);
-	if(leaf->bucket.size() < bucketSize) {
-	    leaf->bucket.push_back(point);
-	    return; //OK, bucket is not full yet
-	}
-	else { //split the bucket into 2 new leaves
-	    points data(leaf->bucket);
-	    data.push_back(point); //add the point to bucket
-	    //create new inner node
-	    Inner * node = new Inner(leaf->parent);
-	    if((Leaf<D> *)leaf->parent->left == leaf) {
-		leaf->parent->left = node;
-	    }
-	    else if((Leaf<D> *)leaf->parent->right == leaf) {
-		leaf->parent->right = node;
-	    }
-	    else {
-		cerr << "somethig is very wrong! Point not inserted.\n";
-		return;
-	    }
-	    delete leaf; //no longer necessary
-	    
-	    //split the nodes along the dimension with greatest local variance
-	    Point<D> min = *(data[0]);
-	    Point<D> max = *(data[0]);
-	    for(points_it it = data.begin(); it != data.end(); ++it) {
-		Point<D> p = *(*it);
-		for(int d = 0; d < D; d++) {
-		    if(p[d] < min[d]) {
-			min[d] = p[d];
-			continue;
-		    }
-		    if(p[d] > max[d]) {
-			max[d] = p[d];
-		    }
-		}
-	    }
-	    int dim;
-	    float dist = 0;
-	    for(int d = 0; d < D; d++) {
-		if(max[d] - min[d] > dist) {
-		    dist = max[d] - min[d];
-		    dim = d;
-		}
-	    }
-	    node->split = min[dim] + dist / 2.0f;
-	    
-	    points l, r; //split the data
-	    for(points_it it = data.begin(); it != data.end(); ++it) {
-		Point<D> p = *(*it);
-		if(p[dim] <= node->split) {
-		    l.push_back(*it);
-		}
-		if(p[dim] > node->split) {
-		    r.push_back(*it);
-		}
-	    }
-	    
-	    //create two new leaves
-	    Leaf<D> * left = new Leaf<D>(node, l);
-	    node->left = left;
-	    
-	    Leaf<D> * right = new Leaf<D>(node, r);
-	    node->right = right;
-	    
-	}
     }
     
 };

@@ -71,17 +71,75 @@ struct Leaf : Node {
     ~Leaf() {}
 };
 
+template<const int D = 3>
+struct TrackingNode {
+private:
+    float tracker[D];
+    float length;
+    
+public:
+    
+    TrackingNode(const TrackingNode<D> &tn) {
+	std::copy(tn.getTracker(), tn.getTracker() + D, tracker);
+	length = tn.getLength();
+    }
+    
+    TrackingNode() {
+	for(int d = 0; d < D; d++) {
+	    tracker[d] = 0;
+	}
+	length = 0;
+    }
+    ~TrackingNode() {}
+    
+//    float& operator[](int idx) {
+//	return tracker[idx];
+//    }
+    //read only
+    const float& operator[](int idx) const {
+	return tracker[idx];
+    }
+    
+    const float* getTracker() const {
+	return &tracker[0];
+    }
+    
+    /**
+     * Sets value in given dimension to given length
+     * @param d dimension
+     * @param val length
+     */
+    void set(int d, float val) {
+	length -= tracker[d];
+	tracker[d] = val*val;
+	length += tracker[d];
+    }
+    
+    float getLength() const {
+	return sqrt(length);
+    }
+
+};
+
+
+/** Status of nodes during NN search */
+enum Visited {
+    RIGHT, LEFT, BOTH, NONE
+};
+
 /**
  * Structure in the stack for NN search
  */
 template<const int D = 3>
-struct ExtendedInner {
+struct ExtendedNode {
     Inner * node;
-    //Status status;
-    float bounds[2*D]; 
-
-
-
+    Visited status;
+    TrackingNode<D> tn;
+    
+    ExtendedNode() : node(NULL) {}
+    ExtendedNode(TrackingNode<D> tn) : node(NULL), tn(tn) {}
+    ExtendedNode(Inner * node) : node(node) {}
+    ExtendedNode(Inner * node, TrackingNode<D> tn) : node(node), tn(tn) {}
 };
 
 #endif	/* KDTREENODES_H */
