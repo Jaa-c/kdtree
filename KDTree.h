@@ -8,6 +8,7 @@
 #define	KDTREE_H
 
 #include <vector>
+#include <stack>
 #include <limits>
 #include <math.h>
 
@@ -22,8 +23,13 @@ using namespace std;
 template<const int D = 3>
 class KDTree {
     
+    
+    enum Status { RightVisited, LeftVisited, AllVisited, NoneVisited};
+    
     typedef vector< Point<D> *> points;
     typedef typename vector< Point<D> *>::iterator points_it;
+    
+    typedef pair<Inner *, Status> exInner;
     
     const static int bucketSize = 8;
     
@@ -182,83 +188,6 @@ public:
 	return root;
     }
     
-    enum Status { RightVisited, LeftVisited, AllVisited, NoneVisited};
-    
-    float dist;
-    Point<D> * nearest;
-    float *window;
-    void search(const Inner * node, Status status, const Point<D> *query) {
-    
-	if(node->right && (status != RightVisited || status == NoneVisited)) {
-	    if(window[2*node->dimension + 1] > node->split) {
-		if(node->right->isLeaf()) {
-		    for(points_it it = ((Leaf<D> *)node->right)->bucket.begin(); it != ((Leaf<D> *)node->right)->bucket.end(); ++it) {
-			(*it)->setColor(0, 255, 255);
-			float tmp = distance(query, *it);
-			if(tmp < dist && tmp > 0) { //ie points are not the same!
-			    dist = tmp;
-			    nearest = *it;
-			    for(int d = 0; d < D; d++) {
-				window[2*d] = (*query)[d] - dist;
-				window[2*d + 1] = (*query)[d] + dist;
-			    }
-			}
-		    }
-		}
-		else {
-		    //Not leaf
-		    search((Inner *) node->right, NoneVisited,  query);
-		}
-	    }
-	    else {
-		if(node->right->isLeaf())
-		    for(points_it it = ((Leaf<D> *)node->right)->bucket.begin(); it != ((Leaf<D> *)node->right)->bucket.end(); ++it) {
-			(*it)->setColor(0, 128, 128);
-		    }
-	    }
-	}
-	
-	if(node->left && (status != LeftVisited || status == NoneVisited)) {
-	    if(window[2*node->dimension] <= node->split) {
-		if(node->left->isLeaf()) {
-		    for(points_it it = ((Leaf<D> *)node->left)->bucket.begin(); it != ((Leaf<D> *)node->left)->bucket.end(); ++it) {
-			(*it)->setColor(255, 255, 0);
-			float tmp = distance(query, *it);
-			if(tmp < dist && tmp > 0) { //ie points are not the same!
-			    dist = tmp;
-			    nearest = *it;
-			    for(int d = 0; d < D; d++) {
-				window[2*d] = (*query)[d] - dist;
-				window[2*d + 1] = (*query)[d] + dist;
-			    }
-			}
-		    }
-		}
-		else {
-		    //Not leaf
-		    search((Inner *) node->left, NoneVisited,  query);
-		}
-	    }
-	    else {
-		if(node->left->isLeaf())
-		    for(points_it it = ((Leaf<D> *)node->left)->bucket.begin(); it != ((Leaf<D> *)node->left)->bucket.end(); ++it) {
-			(*it)->setColor(128, 128, 0);
-		    }
-	    }
-	}
-	//on my way down || in root
-	if(status == NoneVisited || !node->parent) 
-	    return;
-	
-	if((Inner *) node->parent->right == node)
-	    search(node->parent, RightVisited,  query);
-	else
-	    search(node->parent, LeftVisited, query);
-	    
-    
-    }
-    
-    
     
     /**
      * Returns the exact nearest neighbor (NN).
@@ -268,9 +197,10 @@ public:
      */
     Point<D> * nearestNeighbor(const Point<D> *query) {
 	Leaf<D> *leaf = findBucket(query);
-	dist = numeric_limits<float>::max();
-	//Point<D> * nearest;
+	float dist = numeric_limits<float>::max();
+	Point<D> * nearest;
 	
+	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
 	    (*it)->setColor(0, 255, 0);
 	    float tmp = distance(query, *it);
@@ -280,28 +210,95 @@ public:
 	    }
 	}
 	
-	float win[2*D];
+	//create initial window
+	float window[2*D];
 	for(int d = 0; d < D; d++) {
-	    win[2*d] = (*query)[d] - dist;
-	    win[2*d + 1] = (*query)[d] + dist;
-	}
-	window = &win[0];
-	
+	    window[2*d] = (*query)[d] - dist;
+	    window[2*d + 1] = (*query)[d] + dist;
+	}	
 	//cout << window[0] << " " << window[1]<< " " << window[2]<< " " << window[3] << "\n";
 	//PlyHandler::saveWindow<D>(window);
 	
-	Status status;
-	if((Leaf<D> *)leaf->parent->left == leaf) {
-	    status = LeftVisited;
-	}
-	else {
-	    status = RightVisited;
-	}
+	exInner n;
+	n.first = leaf->parent;
+	if((Leaf<D> *)leaf->parent->left == leaf)
+	    n.second = LeftVisited;
+	else
+	    n.second = RightVisited;
 	
-	if((Leaf<D> *) leaf->parent->right == leaf)
-	    search(leaf->parent, RightVisited,  query);
-	else 
-	    search(leaf->parent, LeftVisited, query);
+	stack<exInner> stack; //avoid recursion
+	stack.push(n);
+	
+	while(!stack.empty()) {
+	    exInner exNode = stack.top();
+	    stack.pop();
+	    Inner* node = exNode.first;
+	    Status status = exNode.second;
+	    
+	    if(node->right && (status != RightVisited || status == NoneVisited)) {
+		if(window[2*node->dimension + 1] > node->split) {
+		    if(node->right->isLeaf()) {
+			for(points_it it = ((Leaf<D> *)node->right)->bucket.begin(); it != ((Leaf<D> *)node->right)->bucket.end(); ++it) {
+			    (*it)->setColor(0, 255, 255);
+			    float tmp = distance(query, *it);
+			    if(tmp < dist && tmp > 0) { //ie points are not the same!
+				dist = tmp;
+				nearest = *it;
+				for(int d = 0; d < D; d++) {
+				    window[2*d] = (*query)[d] - dist;
+				    window[2*d + 1] = (*query)[d] + dist;
+				}
+			    }
+			}
+		    }
+		    else {
+			//Not leaf
+			exInner add;
+			add.first = (Inner *) node->right;
+			add.second = NoneVisited;
+			stack.push(add);
+		    }
+		}
+	    }
+
+	    if(node->left && (status != LeftVisited || status == NoneVisited)) {
+		if(window[2*node->dimension] <= node->split) {
+		    if(node->left->isLeaf()) {
+			for(points_it it = ((Leaf<D> *)node->left)->bucket.begin(); it != ((Leaf<D> *)node->left)->bucket.end(); ++it) {
+			    (*it)->setColor(255, 255, 0);
+			    float tmp = distance(query, *it);
+			    if(tmp < dist && tmp > 0) { //ie points are not the same!
+				dist = tmp;
+				nearest = *it;
+				for(int d = 0; d < D; d++) {
+				    window[2*d] = (*query)[d] - dist;
+				    window[2*d + 1] = (*query)[d] + dist;
+				}
+			    }
+			}
+		    }
+		    else {
+			//Not leaf
+			exInner add;
+			add.first = (Inner *) node->left;
+			add.second = NoneVisited;
+			stack.push(add);
+		    }
+		}
+	    }
+	    
+	    //on my way up && not in root
+	    if(status != NoneVisited && node->parent) {
+		exInner add;
+		add.first = (Inner *) node->parent;
+		if((Inner *) node->parent->right == node) 
+		    add.second = RightVisited;
+		else
+		    add.second = LeftVisited;
+
+		stack.push(add);	
+	    }
+	}
 	
 	return nearest;
     }

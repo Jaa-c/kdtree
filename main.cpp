@@ -41,22 +41,32 @@ Point<D> * naiveNN(Point<D> * query, vector< Point<D> > *data) {
 
 int main(int argc, char *argv[]) {
     
-    float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};
-    //PointCloudGenerator<D> pcg;
-    //vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
+    float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};//, 0.f, 3.f};
+//    PointCloudGenerator<D> pcg;
+//    vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
     
-    //PlyHandler::savePoints<D>("data/input.ply", points);
+//    PlyHandler::savePoints<D>("data/input.ply", points);
     vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
     
-    KDTree2Ply::saveTree2Ply(&kdtree, &bounds[0]);
+    KDTree2Ply<D>::saveTree2Ply(&kdtree, &bounds[0]);
+     
+//    Point<2> p;
+//    p.coords[0] = 9;
+//    p.coords[1] = 0;
+//    kdtree.insert(&p);
     
-    Point<2> p;
-    p.coords[0] = 9;
-    p.coords[1] = 0;
-    kdtree.insert(&p);
+//    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+//	Point<D> q = *it;
+//	Point<D> * nn = kdtree.nearestNeighbor(&q);
+//	Point<D> * nnn = naiveNN(&q, &points);
+//	if(nn->coords != nnn->coords) {
+//	    cout << "You got it all wrong!\n";
+//	}
+//    }    
+    
     
     Point<D> * q = &points[14];
     Point<D> * nn = kdtree.nearestNeighbor(q);
@@ -67,7 +77,7 @@ int main(int argc, char *argv[]) {
     cout << "nn: " << *nn  << "\n";
     
         
-    KDTree2Ply::saveTree2Ply(&kdtree, &bounds[0], "test-");
+    KDTree2Ply<D>::saveTree2Ply(&kdtree, &bounds[0], "test-");
     
     return 0;
 }
