@@ -16,10 +16,11 @@
 
 using namespace std;
 
+template<const int D = 2>
 class KDTree2Ply {
     
-    typedef vector< Point<2>* > points;
-    typedef typename vector< Point<2>* >::const_iterator points_it;
+    typedef vector< Point<D>* > points;
+    typedef typename vector< Point<D>* >::const_iterator points_it;
     
 public:
     
@@ -27,31 +28,32 @@ public:
      * Saves points, every bucket in different color
      * makes sense only in 2D
      */
-    static void saveTree2Ply(const KDTree<2> *tree, const float * bounds, string name = "", bool paint = false) {
+    static void saveTree2Ply(const KDTree<D> *tree, const float * bounds, string name = "", bool paint = false) {
 	srand((unsigned)std::time(0)); 
-	vector< Point<2> > data = debugBuckets(tree->getRoot(), paint);
-	PlyHandler::savePoints<2>("data/" + name + "points.ply", data);
+	vector< Point<D> > data = debugBuckets(tree->getRoot(), paint);
+	PlyHandler::savePoints<D>("data/" + name + "points.ply", data);
 	
+	if(D != 2) return;
 	data = debugTree(tree->getRoot(), bounds);
-	PlyHandler::saveLines<2>("data/" + name + "lines.ply", data);
+	PlyHandler::saveLines<D>("data/" + name + "lines.ply", data);
     }
     
 private:
-    static vector< Point<2> > debugBuckets(const Inner* node, bool paint) {
-	vector< Point<2> > data;
+    static vector< Point<D> > debugBuckets(const Inner* node, bool paint) {
+	vector< Point<D> > data;
 	if(node->left) {
 	    
 	    if(!node->left->isLeaf()) {
-		vector< Point<2> > d = debugBuckets((Inner *) node->left, paint);
+		vector< Point<D> > d = debugBuckets((Inner *) node->left, paint);
 		data.insert(data.end(), d.begin(), d.end());
 	    }
 	    else {
-		Leaf<2> * l = (Leaf<2> *) node->left;
+		Leaf<D> * l = (Leaf<D> *) node->left;
 		int r = rand() % 255;
 		int g = rand() % 255;
 		int b = rand() % 255;
 		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
-		    Point<2> p(*(*it));
+		    Point<D> p(*(*it));
 		    if(paint) {
 			p.color[0] = r;
 			p.color[1] = g;
@@ -63,16 +65,16 @@ private:
 	}
 	if(node->right) {
 	    if(!node->right->isLeaf()) {
-		vector< Point<2> > d = debugBuckets((Inner *) node->right, paint);
+		vector< Point<D> > d = debugBuckets((Inner *) node->right, paint);
 		data.insert(data.end(), d.begin(), d.end());
 	    }
 	    else {
-		Leaf<2> * l = (Leaf<2> *) node->right;
+		Leaf<D> * l = (Leaf<D> *) node->right;
 		int r = rand() % 255;
 		int g = rand() % 255;
 		int b = rand() % 255;
 		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
-		    Point<2> p(*(*it));
+		    Point<D> p(*(*it));
 		    if(paint) {
 			p.color[0] = r;
 			p.color[1] = g;
@@ -85,9 +87,10 @@ private:
 	return data;
     }
     
-    static vector< Point<2> > debugTree(const Inner* node, const float* bound) {
-	vector< Point<2> > data;
-	Point<2> p1;
+    static vector< Point<D> > debugTree(const Inner* node, const float* bound) {
+	vector< Point<D> > data;
+	if(D != 2) return data;
+	Point<D> p1;
 	p1[0] = bound[0];
 	p1[1] = bound[2];
 	p1[node->dimension] = node->split;
@@ -95,7 +98,7 @@ private:
 	p1.color[1] = 255;
 	p1.color[2] = 255;
 	
-	Point<2> p2;
+	Point<D> p2;
 	p2[0] = bound[1];
 	p2[1] = bound[3];
 	p2[node->dimension] = node->split;
@@ -109,7 +112,7 @@ private:
 	    float b[4];
 	    std::copy(bound, bound + 4, &b[0]);
 	    b[2*node->dimension + 1] = node->split;
-	    vector< Point<2> > d = debugTree((Inner *) node->left, &b[0]);
+	    vector< Point<D> > d = debugTree((Inner *) node->left, &b[0]);
 	    data.insert(data.end(), d.begin(), d.end());
 	}
 	
@@ -117,7 +120,7 @@ private:
 	    float b[4];
 	    std::copy(bound, bound + 4, &b[0]);
 	    b[2*node->dimension] = node->split;
-	    vector< Point<2> > d = debugTree((Inner *) node->right, &b[0]);
+	    vector< Point<D> > d = debugTree((Inner *) node->right, &b[0]);
 	    data.insert(data.end(), d.begin(), d.end());
 	}
 	return data;
