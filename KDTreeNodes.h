@@ -71,6 +71,18 @@ struct Leaf : Node {
     ~Leaf() {}
 };
 
+/**
+ * Structure in the stack for NN search
+ */
+template<const int D = 3>
+struct ExtendedInner {
+    Inner * node;
+    //Status status;
+    float bounds[2*D]; 
+
+
+
+};
 
 #endif	/* KDTREENODES_H */
 

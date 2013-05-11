@@ -8,6 +8,8 @@
 #define	KDTREE_H
 
 #include <vector>
+#include <limits>
+#include <math.h>
 
 using namespace std;
 #include "Point.h"
@@ -74,7 +76,6 @@ class KDTree {
 		std::copy(bounds, bounds + 2*D, &b[0]);
 		b[2*dim + 1] = split;
 		construct(&left, &b[0], node);
-		
 	    }
 	    else {
 		Leaf<D> * leaf = new Leaf<D>(parent, left);
@@ -122,8 +123,21 @@ class KDTree {
     }
     
     
+    const float distance(const Point<D> * p1, const Point<D> * p2) const {
+	float dist = 0;
+	for(int d = 0; d < D; d++) {
+	    static float tmp = abs(p1[d] - p2[d]);
+	    dist += tmp*tmp;
+	}
+	return sqrt(dist);
+    }
+    
+    
 public:
-	
+
+    /**
+     * Creates empty kd-tree
+     */
     KDTree() {
 	root = new Inner(NULL);
     }
@@ -167,6 +181,77 @@ public:
 	return root;
     }
     
+    enum Status { RightVisited, LeftVisited, AllVisited};
+    
+    
+    
+    
+    /**
+     * Returns the exact nearest neighbor (NN).
+     * If there are more NNs, method retuns one random.
+     * @param query the point whose NN we search
+     * @return nearest neigbor
+     */
+    const Point<D> * nearestNeighbor(const Point<D> *query) const {
+	Leaf<D> *leaf = findBucket(query);
+	float distance = numeric_limits<float>::max();
+	Point<D> * nearest;
+	
+	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
+	    float tmp = distance(query, *it);
+	    if(tmp < distance && distance > 0) { //ie points are not the same!
+		distance = tmp;
+		nearest = *it;
+	    }
+	}
+	
+	float window[2*D];
+	for(int d = 0; d < D; d++) {
+	    window[2*d] = query[d] - distance;
+	    window[2*d + 1] = query[d] + distance;
+	}
+	
+	Status status;
+	if((Leaf<D> *)leaf->parent->left == leaf) {
+	    status = LeftVisited;
+	}
+	else {
+	    status = RightVisited;
+	}
+	
+	Inner * node = leaf->parent;
+	
+	if(status != RightVisited) {
+	    if(window[2*D] < node->split) {
+		if(node->right->isLeaf()) {
+		    for(points_it it = node->right->bucket.begin(); it != node->right->bucket.end(); ++it) {
+			float tmp = distance(query, *it);
+			if(tmp < distance && distance > 0) { //ie points are not the same!
+			    distance = tmp;
+			    nearest = *it;
+			    window[2*node->dimension] = query[node->dimension] - distance;
+			    window[2*node->dimension + 1] = query[node->dimension] + distance;
+			}
+		    }
+		}
+		else {
+		    //Not leaf
+		}
+	    }
+	}
+	
+	if(status != LeftVisited) {
+	    if(window[2*D + 1] >= node->split) {
+	    
+	    
+	    
+	    }
+	}
+	
+	
+    
+    }
+    
     
     /**
      * Inserts point into the tree
@@ -190,9 +275,10 @@ public:
 		leaf->parent->right = node;
 	    }
 	    else {
-		cout << "somethig is wrong (operator ==)\n";
+		cerr << "somethig is very wrong! Point not inserted.\n";
+		return;
 	    }
-	    delete leaf;
+	    delete leaf; //no longer necessary
 	    
 	    //split the nodes along the dimension with greatest local variance
 	    Point<D> min = *(data[0]);

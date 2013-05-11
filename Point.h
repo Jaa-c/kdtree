@@ -1,6 +1,6 @@
 /* d
  * File:   Point.h
- * Author: jaa
+ * Author: Daniel Princ
  *
  */
 

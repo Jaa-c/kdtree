@@ -19,11 +19,11 @@ using namespace std;
 int main(int argc, char *argv[]) {
     
     float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};
-    //PointCloudGenerator<D> pcg;
-    //vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
     
     //PlyHandler::savePoints<D>("data/input.ply", points);
-    vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
+    //vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
