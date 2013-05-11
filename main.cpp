@@ -44,8 +44,8 @@ int main(int argc, char *argv[]) {
     float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};//, 0.f, 3.f};
 //    PointCloudGenerator<D> pcg;
 //    vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
-    
 //    PlyHandler::savePoints<D>("data/input.ply", points);
+    
     vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
     
     KDTree<D> kdtree;
@@ -58,23 +58,29 @@ int main(int argc, char *argv[]) {
 //    p.coords[1] = 0;
 //    kdtree.insert(&p);
     
-//    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
-//	Point<D> q = *it;
-//	Point<D> * nn = kdtree.nearestNeighbor(&q);
-//	Point<D> * nnn = naiveNN(&q, &points);
-//	if(nn->coords != nnn->coords) {
-//	    cout << "You got it all wrong!\n";
-//	}
-//    }    
+    
+    int i;
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+	Point<D> q = *it;
+	//Point<D> * nn = kdtree.simpleNearestNeighbor(&q);
+	Point<D> * nn = kdtree.nearestNeighbor(&q);
+	Point<D> * nnn = naiveNN(&q, &points);
+	if(nn->coords != nnn->coords) {
+	    cout << i << " You got it all wrong!\n";
+	}
+	i++;
+    }    
     
     
-    Point<D> * q = &points[14];
-    Point<D> * nn = kdtree.nearestNeighbor(q);
-
-    nn->setColor(0, 0, 255);
-    q->setColor(255, 0, 0);
-    cout << "q:" << *q << "\n";
-    cout << "nn: " << *nn  << "\n";
+//    Point<D> * q = &points[6];
+//    Point<D> * nn = kdtree.nearestNeighbor(q);
+//    Point<D> * nnn = naiveNN(q, &points);
+//
+//    nn->setColor(0, 0, 255);
+//    q->setColor(255, 0, 0);
+//    cout << "q:" << *q << "\n";
+//    cout << "nn: " << *nn  << "\n";
+//    cout << "nnn: " << *nnn  << "\n";
     
         
     KDTree2Ply<D>::saveTree2Ply(&kdtree, &bounds[0], "test-");

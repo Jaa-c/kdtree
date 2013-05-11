@@ -81,7 +81,7 @@ public:
     
     TrackingNode(const TrackingNode<D> &tn) {
 	std::copy(tn.getTracker(), tn.getTracker() + D, tracker);
-	length = tn.getLength();
+	length = tn.getLengthSquare();
     }
     
     TrackingNode() {
@@ -115,8 +115,17 @@ public:
 	length += tracker[d];
     }
     
+    void remove(int d, float val) {
+	tracker[d] -= val*val;
+	length -= val*val;
+    }
+    
     float getLength() const {
 	return sqrt(length);
+    }
+    
+    float getLengthSquare() const {
+	return length;
     }
 
 };

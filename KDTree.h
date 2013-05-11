@@ -246,19 +246,33 @@ public:
 	    ExtendedNode<D> left(exNode.tn);
 	    ExtendedNode<D> right(exNode.tn);
 	    
-	    
 	    if(exNode.node->right && (exNode.status != RIGHT || exNode.status == NONE)) {
-		right.tn.set(exNode.node->dimension, abs(exNode.node->split - (*query)[exNode.node->dimension]));
+		float d = exNode.node->split - (*query)[exNode.node->dimension];
+		right.tn.set(exNode.node->dimension, max(0.0f, d));
 		if(right.tn.getLength() < dist) {
 		    right.node = (Inner *)exNode.node->right;
 		}
 	    }
 
 	    if(exNode.node->left && (exNode.status != LEFT || exNode.status == NONE)) {
-		left.tn.set(exNode.node->dimension, abs(exNode.node->split - (*query)[exNode.node->dimension]));
+		float d = (*query)[exNode.node->dimension] - exNode.node->split;
+		left.tn.set(exNode.node->dimension, max(0.0f, d));
 		if(left.tn.getLength() < dist) {
 		    left.node = (Inner *) exNode.node->left;
 		}
+	    }
+	    
+	    //on my way up && not in root
+	    if(exNode.status != NONE && exNode.node->parent) {
+		ExtendedNode<D> add(exNode.node->parent, exNode.tn);
+		//add.tn.set(exNode.node->dimension, abs(exNode.node->split - (*query)[exNode.node->dimension]));
+		
+		if((Inner *) exNode.node->parent->right == exNode.node) 
+		    add.status = RIGHT;
+		else
+		    add.status = LEFT;
+
+		stack.push(add);	
 	    }
 	    
 	    for(int i = 0; i < 2; i++) {
@@ -284,21 +298,10 @@ public:
 		    }
 		    else {
 			//Not leaf, add Node to the stack
+			exN.status = NONE;
 			stack.push(exN);
 		    }
 		}
-	    }
-	    
-	    //on my way up && not in root
-	    if(exNode.status != NONE && exNode.node->parent) {
-		ExtendedNode<D> add(exNode.node->parent, exNode.tn);
-		
-		if((Inner *) exNode.node->parent->right == exNode.node) 
-		    add.status = RIGHT;
-		else
-		    add.status = LEFT;
-
-		stack.push(add);	
 	    }
 	}
 	
