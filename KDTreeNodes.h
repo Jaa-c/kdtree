@@ -44,7 +44,7 @@ private:
  */
 struct Inner : Node {
     /** index of dimension that is split by this node */
-    unsigned char dimension;
+    unsigned int dimension;
     /** value where the dimesion is split*/
     float split;
     
@@ -65,9 +65,9 @@ struct Inner : Node {
  */
 template<const int D = 3>
 struct Leaf : Node {
-    std::vector< const Point<D>* > bucket;
+    std::vector< Point<D>* > bucket;
     
-    Leaf(Inner *parent, std::vector< const Point<D>* > bucket) : Node(true, parent), bucket(bucket) {}
+    Leaf(Inner *parent, std::vector< Point<D>* > bucket) : Node(true, parent), bucket(bucket) {}
     ~Leaf() {}
 };
 

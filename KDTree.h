@@ -14,6 +14,7 @@
 using namespace std;
 #include "Point.h"
 #include "KDTreeNodes.h"
+#include "PlyHandler.h"
 
 /**
  * kd-tree!
@@ -21,14 +22,14 @@ using namespace std;
 template<const int D = 3>
 class KDTree {
     
-    typedef vector< const Point<D>* > points;
-    typedef typename vector< const Point<D>* >::const_iterator points_it;
+    typedef vector< Point<D> *> points;
+    typedef typename vector< Point<D> *>::iterator points_it;
     
     const static int bucketSize = 8;
     
     Inner * root;
     
-    void construct(const points * data, float * bounds, Inner* parent)  {
+    void construct( points * data, float * bounds, Inner* parent)  {
 	
 	int dim = -1; //dimension to split
 	float size = 0;
@@ -44,7 +45,7 @@ class KDTree {
 	float lmax = 0, rmin = split * bounds[2*dim + 1];
 	
 	for(points_it it = data->begin(); it != data->end(); ++it) {
-	    const Point<D> p = *(*it);
+	    Point<D> p = *(*it);
 	    if(p[dim] <= split) { //NOTE: points exactly on split line belong to left node!
 		left.push_back(*it);
 		if(p[dim] > lmax)
@@ -106,7 +107,7 @@ class KDTree {
      * @param point point in question
      * @return bucket in which the point belongs
      */
-    Leaf<D> * findBucket(const Point<D> *point) {
+    Leaf<D> * findBucket(const Point<D> *point) const {
 	Inner* node = root;
 	while(true) {
 	    if((*point)[node->dimension] <= node->split) {
@@ -123,10 +124,10 @@ class KDTree {
     }
     
     
-    const float distance(const Point<D> * p1, const Point<D> * p2) const {
+    const float distance(const Point<D> * p1, const Point<D> * p2) {
 	float dist = 0;
 	for(int d = 0; d < D; d++) {
-	    static float tmp = abs(p1[d] - p2[d]);
+	    float tmp = abs((*p1)[d] - (*p2)[d]);
 	    dist += tmp*tmp;
 	}
 	return sqrt(dist);
@@ -153,7 +154,7 @@ public:
      * @param[in] bounds array with bounds of the coordinates \
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
      */
-    void construct(const points * data, float * bounds) {
+    void construct(points * data, float * bounds) {
 	construct(data, bounds, root);
     }
     
@@ -165,9 +166,9 @@ public:
      * @param[in] bounds array with bounds of the coordinates \
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
      */
-    void construct(const vector< Point<D> > * data, float * bounds) {
-	vector< const Point<D>* > pointers;
-	for(typename vector< Point<D> >::const_iterator it = data->begin(); it != data->end(); ++it) {
+    void construct(vector< Point<D> > * data, float * bounds) {
+	vector< Point<D>* > pointers;
+	for(typename vector< Point<D> >::iterator it = data->begin(); it != data->end(); ++it) {
 	    pointers.push_back(&(*it));
 	}
 	construct(&pointers, bounds);
@@ -181,8 +182,81 @@ public:
 	return root;
     }
     
-    enum Status { RightVisited, LeftVisited, AllVisited};
+    enum Status { RightVisited, LeftVisited, AllVisited, NoneVisited};
     
+    float dist;
+    Point<D> * nearest;
+    float *window;
+    void search(const Inner * node, Status status, const Point<D> *query) {
+    
+	if(node->right && (status != RightVisited || status == NoneVisited)) {
+	    if(window[2*node->dimension + 1] > node->split) {
+		if(node->right->isLeaf()) {
+		    for(points_it it = ((Leaf<D> *)node->right)->bucket.begin(); it != ((Leaf<D> *)node->right)->bucket.end(); ++it) {
+			(*it)->setColor(0, 255, 255);
+			float tmp = distance(query, *it);
+			if(tmp < dist && tmp > 0) { //ie points are not the same!
+			    dist = tmp;
+			    nearest = *it;
+			    for(int d = 0; d < D; d++) {
+				window[2*d] = (*query)[d] - dist;
+				window[2*d + 1] = (*query)[d] + dist;
+			    }
+			}
+		    }
+		}
+		else {
+		    //Not leaf
+		    search((Inner *) node->right, NoneVisited,  query);
+		}
+	    }
+	    else {
+		if(node->right->isLeaf())
+		    for(points_it it = ((Leaf<D> *)node->right)->bucket.begin(); it != ((Leaf<D> *)node->right)->bucket.end(); ++it) {
+			(*it)->setColor(0, 128, 128);
+		    }
+	    }
+	}
+	
+	if(node->left && (status != LeftVisited || status == NoneVisited)) {
+	    if(window[2*node->dimension] <= node->split) {
+		if(node->left->isLeaf()) {
+		    for(points_it it = ((Leaf<D> *)node->left)->bucket.begin(); it != ((Leaf<D> *)node->left)->bucket.end(); ++it) {
+			(*it)->setColor(255, 255, 0);
+			float tmp = distance(query, *it);
+			if(tmp < dist && tmp > 0) { //ie points are not the same!
+			    dist = tmp;
+			    nearest = *it;
+			    for(int d = 0; d < D; d++) {
+				window[2*d] = (*query)[d] - dist;
+				window[2*d + 1] = (*query)[d] + dist;
+			    }
+			}
+		    }
+		}
+		else {
+		    //Not leaf
+		    search((Inner *) node->left, NoneVisited,  query);
+		}
+	    }
+	    else {
+		if(node->left->isLeaf())
+		    for(points_it it = ((Leaf<D> *)node->left)->bucket.begin(); it != ((Leaf<D> *)node->left)->bucket.end(); ++it) {
+			(*it)->setColor(128, 128, 0);
+		    }
+	    }
+	}
+	//on my way down || in root
+	if(status == NoneVisited || !node->parent) 
+	    return;
+	
+	if((Inner *) node->parent->right == node)
+	    search(node->parent, RightVisited,  query);
+	else
+	    search(node->parent, LeftVisited, query);
+	    
+    
+    }
     
     
     
@@ -192,24 +266,29 @@ public:
      * @param query the point whose NN we search
      * @return nearest neigbor
      */
-    const Point<D> * nearestNeighbor(const Point<D> *query) const {
+    Point<D> * nearestNeighbor(const Point<D> *query) {
 	Leaf<D> *leaf = findBucket(query);
-	float distance = numeric_limits<float>::max();
-	Point<D> * nearest;
+	dist = numeric_limits<float>::max();
+	//Point<D> * nearest;
 	
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
+	    (*it)->setColor(0, 255, 0);
 	    float tmp = distance(query, *it);
-	    if(tmp < distance && distance > 0) { //ie points are not the same!
-		distance = tmp;
+	    if(tmp < dist && tmp > 0) { //ie points are not the same!
+		dist = tmp;
 		nearest = *it;
 	    }
 	}
 	
-	float window[2*D];
+	float win[2*D];
 	for(int d = 0; d < D; d++) {
-	    window[2*d] = query[d] - distance;
-	    window[2*d + 1] = query[d] + distance;
+	    win[2*d] = (*query)[d] - dist;
+	    win[2*d + 1] = (*query)[d] + dist;
 	}
+	window = &win[0];
+	
+	//cout << window[0] << " " << window[1]<< " " << window[2]<< " " << window[3] << "\n";
+	//PlyHandler::saveWindow<D>(window);
 	
 	Status status;
 	if((Leaf<D> *)leaf->parent->left == leaf) {
@@ -219,37 +298,12 @@ public:
 	    status = RightVisited;
 	}
 	
-	Inner * node = leaf->parent;
+	if((Leaf<D> *) leaf->parent->right == leaf)
+	    search(leaf->parent, RightVisited,  query);
+	else 
+	    search(leaf->parent, LeftVisited, query);
 	
-	if(status != RightVisited) {
-	    if(window[2*D] < node->split) {
-		if(node->right->isLeaf()) {
-		    for(points_it it = node->right->bucket.begin(); it != node->right->bucket.end(); ++it) {
-			float tmp = distance(query, *it);
-			if(tmp < distance && distance > 0) { //ie points are not the same!
-			    distance = tmp;
-			    nearest = *it;
-			    window[2*node->dimension] = query[node->dimension] - distance;
-			    window[2*node->dimension + 1] = query[node->dimension] + distance;
-			}
-		    }
-		}
-		else {
-		    //Not leaf
-		}
-	    }
-	}
-	
-	if(status != LeftVisited) {
-	    if(window[2*D + 1] >= node->split) {
-	    
-	    
-	    
-	    }
-	}
-	
-	
-    
+	return nearest;
     }
     
     
@@ -257,7 +311,7 @@ public:
      * Inserts point into the tree
      * @param point point to insert
      */
-    void insert(const Point<D> *point) { //TODO: insert to empty tree
+    void insert(Point<D> *point) { //TODO: insert to empty tree
 	Leaf<D> * leaf = findBucket(point);
 	if(leaf->bucket.size() < bucketSize) {
 	    leaf->bucket.push_back(point);

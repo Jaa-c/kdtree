@@ -18,8 +18,8 @@ using namespace std;
 
 class KDTree2Ply {
     
-    typedef vector< const Point<2>* > points;
-    typedef typename vector< const Point<2>* >::const_iterator points_it;
+    typedef vector< Point<2>* > points;
+    typedef typename vector< Point<2>* >::const_iterator points_it;
     
 public:
     
@@ -27,9 +27,9 @@ public:
      * Saves points, every bucket in different color
      * makes sense only in 2D
      */
-    static void saveTree2Ply(const KDTree<2> *tree, const float * bounds, string name = "") {
+    static void saveTree2Ply(const KDTree<2> *tree, const float * bounds, string name = "", bool paint = false) {
 	srand((unsigned)std::time(0)); 
-	vector< Point<2> > data = debugBuckets(tree->getRoot());
+	vector< Point<2> > data = debugBuckets(tree->getRoot(), paint);
 	PlyHandler::savePoints<2>("data/" + name + "points.ply", data);
 	
 	data = debugTree(tree->getRoot(), bounds);
@@ -37,12 +37,12 @@ public:
     }
     
 private:
-    static vector< Point<2> > debugBuckets(const Inner* node) {
+    static vector< Point<2> > debugBuckets(const Inner* node, bool paint) {
 	vector< Point<2> > data;
 	if(node->left) {
 	    
 	    if(!node->left->isLeaf()) {
-		vector< Point<2> > d = debugBuckets((Inner *) node->left);
+		vector< Point<2> > d = debugBuckets((Inner *) node->left, paint);
 		data.insert(data.end(), d.begin(), d.end());
 	    }
 	    else {
@@ -51,19 +51,19 @@ private:
 		int g = rand() % 255;
 		int b = rand() % 255;
 		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
-		    Point<2> p;
-		    p.coords[0] = (*it)->coords[0];
-		    p.coords[1] = (*it)->coords[1];
-		    p.color[0] = r;
-		    p.color[1] = g;
-		    p.color[2] = b;
+		    Point<2> p(*(*it));
+		    if(paint) {
+			p.color[0] = r;
+			p.color[1] = g;
+			p.color[2] = b;
+		    }
 		    data.push_back(p);
 		}
 	    }
 	}
 	if(node->right) {
 	    if(!node->right->isLeaf()) {
-		vector< Point<2> > d = debugBuckets((Inner *) node->right);
+		vector< Point<2> > d = debugBuckets((Inner *) node->right, paint);
 		data.insert(data.end(), d.begin(), d.end());
 	    }
 	    else {
@@ -72,12 +72,12 @@ private:
 		int g = rand() % 255;
 		int b = rand() % 255;
 		for(points_it it = l->bucket.begin(); it != l->bucket.end(); ++it) {
-		    Point<2> p;
-		    p.coords[0] = (*it)->coords[0];
-		    p.coords[1] = (*it)->coords[1];
-		    p.color[0] = r;
-		    p.color[1] = g;
-		    p.color[2] = b;
+		    Point<2> p(*(*it));
+		    if(paint) {
+			p.color[0] = r;
+			p.color[1] = g;
+			p.color[2] = b;
+		    }
 		    data.push_back(p);
 		}
 	    }

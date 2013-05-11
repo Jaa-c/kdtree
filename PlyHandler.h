@@ -192,6 +192,34 @@ public:
 	
 	myfile.close();
     }
+    
+    template<const int D>
+    static void saveWindow(float* window) {
+	if(D != 2) return;
+	vector< Point<D> > data;
+	Point<D> p;
+	p[0] = window[0];
+	p[1] = window[2];
+	data.push_back(p);
+	Point<D> p1;
+	p1[0] = window[0];
+	p1[1] = window[3];
+	data.push_back(p1);
+	data.push_back(p1);
+	Point<D> p2;
+	p2[0] = window[1];
+	p2[1] = window[3];
+	data.push_back(p2);
+	data.push_back(p2);
+	Point<D> p3;
+	p3[0] = window[1];
+	p3[1] = window[2];
+	data.push_back(p3);
+	data.push_back(p3);
+	data.push_back(p);
+	
+	PlyHandler::saveLines<D>("data/window.ply", data);
+    }
 
 };
 

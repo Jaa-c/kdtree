@@ -44,6 +44,12 @@ struct Point {
 	return coords[idx];
     }
     
+    void setColor(int r, int g, int b) {
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+    }
+    
     friend std::ostream& operator<<(std::ostream& out, const Point& p) // output
     {
 	out << "Point[" << D << "]: coord ";
