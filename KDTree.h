@@ -23,20 +23,26 @@ using namespace std;
 template<const int D = 3>
 class KDTree {
     
-    
-    enum Status { RightVisited, LeftVisited, AllVisited, NoneVisited};
+    /** Status of nodes during NN search */
+    enum Visited {RIGHT, LEFT, BOTH, NONE};
     
     typedef vector< Point<D> *> points;
     typedef typename vector< Point<D> *>::iterator points_it;
+    typedef pair<Inner *, Visited> exInner;
     
-    typedef pair<Inner *, Status> exInner;
-    
+    /** Size of the bucket*/
     const static int bucketSize = 8;
     
+    /** root of the tree */
     Inner * root;
     
-    void construct( points * data, float * bounds, Inner* parent)  {
-	
+    /**
+     * Recursive construction of the tree
+     * @param data Set on unordered points
+     * @param bounds current bounds in the tree
+     * @param parent parent node
+     */
+    void construct(points * data, float * bounds, Inner* parent)  {
 	int dim = -1; //dimension to split
 	float size = 0;
 	for(int i = 0; i < D; i++) {
@@ -129,8 +135,13 @@ class KDTree {
 	}
     }
     
-    
-    const float distance(const Point<D> * p1, const Point<D> * p2) {
+    /**
+     * Calculates distance
+     * @param p1
+     * @param p2
+     * @return 
+     */
+    inline const float distance(const Point<D> * p1, const Point<D> * p2) {
 	float dist = 0;
 	for(int d = 0; d < D; d++) {
 	    float tmp = abs((*p1)[d] - (*p2)[d]);
@@ -155,7 +166,7 @@ public:
     /**
      *  Builds the KD-Tree on a given set of points
      * 
-     * @param[in] data vector of pointers to points
+     * @param[in] data vector of pointers to unordered points
      * @param[in] dataSize size od given array
      * @param[in] bounds array with bounds of the coordinates \
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
@@ -167,7 +178,7 @@ public:
     /**
      *  Builds the KD-Tree on a given set of points
      * 
-     * @param[in] data vector of  points
+     * @param[in] data vector of unordered points
      * @param[in] dataSize size od given array
      * @param[in] bounds array with bounds of the coordinates \
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
@@ -222,50 +233,40 @@ public:
 	exInner n;
 	n.first = leaf->parent;
 	if((Leaf<D> *)leaf->parent->left == leaf)
-	    n.second = LeftVisited;
+	    n.second = LEFT;
 	else
-	    n.second = RightVisited;
+	    n.second = RIGHT;
 	
 	stack<exInner> stack; //avoid recursion
 	stack.push(n);
 	
-	while(!stack.empty()) {
+	while(!stack.empty()) { //check possible nodes
 	    exInner exNode = stack.top();
 	    stack.pop();
 	    Inner* node = exNode.first;
-	    Status status = exNode.second;
+	    Visited status = exNode.second;
 	    
-	    if(node->right && (status != RightVisited || status == NoneVisited)) {
+	    Node *nodes[2]; //left and right child
+	    nodes[0] = nodes[1] = NULL;
+	    
+	    if(node->right && (status != RIGHT || status == NONE)) {
 		if(window[2*node->dimension + 1] > node->split) {
-		    if(node->right->isLeaf()) {
-			for(points_it it = ((Leaf<D> *)node->right)->bucket.begin(); it != ((Leaf<D> *)node->right)->bucket.end(); ++it) {
-			    (*it)->setColor(0, 255, 255);
-			    float tmp = distance(query, *it);
-			    if(tmp < dist && tmp > 0) { //ie points are not the same!
-				dist = tmp;
-				nearest = *it;
-				for(int d = 0; d < D; d++) {
-				    window[2*d] = (*query)[d] - dist;
-				    window[2*d + 1] = (*query)[d] + dist;
-				}
-			    }
-			}
-		    }
-		    else {
-			//Not leaf
-			exInner add;
-			add.first = (Inner *) node->right;
-			add.second = NoneVisited;
-			stack.push(add);
-		    }
+		    nodes[0] = node->right;
 		}
 	    }
 
-	    if(node->left && (status != LeftVisited || status == NoneVisited)) {
+	    if(node->left && (status != LEFT || status == NONE)) {
 		if(window[2*node->dimension] <= node->split) {
-		    if(node->left->isLeaf()) {
-			for(points_it it = ((Leaf<D> *)node->left)->bucket.begin(); it != ((Leaf<D> *)node->left)->bucket.end(); ++it) {
-			    (*it)->setColor(255, 255, 0);
+		    nodes[1] = node->left;
+		}
+	    }
+	    
+	    for(int i = 0; i < 2; i++) {
+		if(nodes[i]) { //check node 
+		    if((nodes[i])->isLeaf()) {
+			points bucket = ((Leaf<D> *)(nodes[i]))->bucket;
+			for(points_it it = bucket.begin(); it != bucket.end(); ++it) {
+			    //(*it)->setColor(255, 255, 0);
 			    float tmp = distance(query, *it);
 			    if(tmp < dist && tmp > 0) { //ie points are not the same!
 				dist = tmp;
@@ -278,23 +279,21 @@ public:
 			}
 		    }
 		    else {
-			//Not leaf
-			exInner add;
-			add.first = (Inner *) node->left;
-			add.second = NoneVisited;
+			//Not leaf, add Node to the stack
+			exInner add((Inner *) nodes[i], NONE);
 			stack.push(add);
 		    }
 		}
 	    }
 	    
 	    //on my way up && not in root
-	    if(status != NoneVisited && node->parent) {
+	    if(status != NONE && node->parent) {
 		exInner add;
 		add.first = (Inner *) node->parent;
 		if((Inner *) node->parent->right == node) 
-		    add.second = RightVisited;
+		    add.second = RIGHT;
 		else
-		    add.second = LeftVisited;
+		    add.second = LEFT;
 
 		stack.push(add);	
 	    }
