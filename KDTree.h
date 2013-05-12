@@ -34,6 +34,9 @@ class KDTree {
     /** root of the tree */
     Inner * root;
     
+    /** number of points inside the tree */
+    int size;
+    
     /**
      * Recursive construction of the tree
      * @param data Set on unordered points
@@ -212,6 +215,7 @@ public:
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
      */
     void construct(points * data, float * bounds) {
+	size = data->size();
 	construct(data, bounds, root);
     }
     
@@ -257,15 +261,17 @@ public:
 	float r = sqrt(dist) / 2.0f;
 	
 	int diff = k - leaf->bucket.size();
-	float df = pow(diff, 1 / (float) D);
-	r *= df; // works pretty well
+	if(diff > 0) {
+	    float df = pow(diff, 1 / (float) D);
+	    r *= df; // works pretty well
+	}
 	
 	vector< Point<D> * > knn;
-	//TODO: check if k > points in tree = infinite loop
-	//TODO> this is certainly not the most efficient solution
+	
+	//TODO: this is certainly not the most efficient solution
 	while(true) { 
 	     knn = circularQuery(query, r);
-	    if(knn.size() > k + 1) {
+	    if(knn.size() > k + 1 || knn.size() == size) {
 		break;
 	    }
 	    else {
@@ -546,6 +552,7 @@ public:
      * @param point point to insert
      */
     void insert(Point<D> *point) { //TODO: insert to empty tree
+	size++;
 	Leaf<D> * leaf = findBucket(point);
 	if(leaf->bucket.size() < bucketSize) {
 	    leaf->add(point);

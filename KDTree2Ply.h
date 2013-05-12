@@ -31,11 +31,11 @@ public:
     static void saveTree2Ply(const KDTree<D> *tree, const float * bounds, string name = "", bool paint = false) {
 	srand((unsigned)std::time(0)); 
 	vector< Point<D> > data = debugBuckets(tree->getRoot(), paint);
-	PlyHandler::savePoints<D>("data/" + name + "points.ply", data);
+	PlyHandler::savePoints<D>(name + "points.ply", data);
 	
 	if(D != 2) return;
 	data = debugTree(tree->getRoot(), bounds);
-	PlyHandler::saveLines<D>("data/" + name + "lines.ply", data);
+	PlyHandler::saveLines<D>(name + "lines.ply", data);
     }
     
 private:
