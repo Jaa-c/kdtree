@@ -79,12 +79,7 @@ private:
     float length;
     
 public:
-    
-    TrackingNode(const TrackingNode<D> &tn) {
-	std::copy(tn.getTracker(), tn.getTracker() + D, tracker);
-	length = tn.getLengthSquare();
-    }
-    
+        
     TrackingNode() {
 	for(int d = 0; d < D; d++) {
 	    tracker[d] = 0;
@@ -93,16 +88,9 @@ public:
     }
     ~TrackingNode() {}
     
-//    float& operator[](int idx) {
-//	return tracker[idx];
-//    }
     //read only
     const float& operator[](int idx) const {
 	return tracker[idx];
-    }
-    
-    const float* getTracker() const {
-	return &tracker[0];
     }
     
     /**
@@ -115,6 +103,21 @@ public:
 	tracker[d] = val*val;
 	length += tracker[d];
     }
+    
+    /**
+     * Similar to set, except it only returns length and doesn't
+     * modify the object. It'm using it to avoid creatin new objects
+     * on stack if it's not necessary.
+     * @param d dimension
+     * @param val value to change
+     * @return squared length
+     */
+    float getUpdatedLength(int d, float val) const {
+	float temp =  length - tracker[d];
+	temp += val * val;
+	return temp;
+    }
+    
     
     void remove(int d, float val) {
 	tracker[d] -= val*val;
@@ -134,7 +137,14 @@ public:
 
 /** Status of nodes during NN search */
 enum Visited {
-    RIGHT, LEFT, BOTH, NONE
+    /** right child has been visited*/
+    RIGHT, 
+    /** left child has been visited*/
+    LEFT, 
+    /** both children have been visited*/
+    BOTH, 
+    /** none child has been visited*/
+    NONE
 };
 
 /**
@@ -147,9 +157,7 @@ struct ExtendedNode {
     TrackingNode<D> tn;
     
     ExtendedNode() : node(NULL) {}
-    ExtendedNode(TrackingNode<D> tn) : node(NULL), tn(tn) {}
     ExtendedNode(Inner * node) : node(node) {}
-    ExtendedNode(Inner * node, TrackingNode<D> tn) : node(node), tn(tn) {}
 };
 
 #endif	/* KDTREENODES_H */

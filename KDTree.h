@@ -5,7 +5,7 @@
  */
 
 #ifndef KDTREE_H
-#define	KDTREE_H
+#define KDTREE_H
 
 #include <vector>
 #include <stack>
@@ -226,61 +226,60 @@ public:
 	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
 	    (*it)->setColor(0, 255, 0);
-	    float tmp = distance(query, *it);
+	    float tmp = distance(query, *it, false);
 	    if(tmp < dist && tmp > 0) { //ie points are not the same!
 		dist = tmp;
 		nearest = *it;
 	    }
 	}
-	
-	//create initial window
-	float window[2*D];
-	for(int d = 0; d < D; d++) {
-	    window[2*d] = (*query)[d] - dist;
-	    window[2*d + 1] = (*query)[d] + dist;
-	}	
-	//cout << window[0] << " " << window[1]<< " " << window[2]<< " " << window[3] << "\n";
-	//PlyHandler::saveWindow<D>(window);
-	
-	ExtendedNode<D> n(leaf->parent);
+		
+	ExtendedNode<D> firstNode(leaf->parent);
 	if((Leaf<D> *)leaf->parent->left == leaf)
-	    n.status = LEFT;
+	    firstNode.status = LEFT;
 	else
-	    n.status = RIGHT;
+	    firstNode.status = RIGHT;
 	
 	stack< ExtendedNode<D> > stack; //avoid recursion
-	stack.push(n);
+	stack.push(firstNode);
 	
-	while(!stack.empty()) { //check possible nodes
+	// check possible nodes for NN
+	while(!stack.empty()) { 
 	    ExtendedNode<D> exNode = stack.top();
 	    stack.pop();
+	    	    
+	    Node * nleft = NULL;
+	    Node * nright = NULL;
 	    
-	    ExtendedNode<D> left(exNode.tn);
-	    ExtendedNode<D> right(exNode.tn);
-	    
+	    /// if right child exist && it has not been searchd yet
 	    if(exNode.node->right && (exNode.status != RIGHT || exNode.status == NONE)) {
-		float d = exNode.node->split - (*query)[exNode.node->dimension];
-		if(d > 0)
-		    right.tn.set(exNode.node->dimension, d);
-		if(right.tn.getLength() < dist) {
-		    right.node = (Inner *)exNode.node->right;
+		float diff, dTemp = exNode.node->split - (*query)[exNode.node->dimension];
+		if(dTemp > 0) // only if I'm "crossing line from left to right"
+		    diff = exNode.tn.getUpdatedLength(exNode.node->dimension, dTemp);
+		else
+		    diff = exNode.tn.getLengthSquare();
+		
+		if(diff < dist) { //if there possibly can be nearer point than current nearest
+		    nright = exNode.node->right;
 		}
 	    }
-
+	    /// if left child exist && it has not been searchd yet
 	    if(exNode.node->left && (exNode.status != LEFT || exNode.status == NONE)) {
-		float d = (*query)[exNode.node->dimension] - exNode.node->split;
-		if(d > 0)
-		    left.tn.set(exNode.node->dimension,d);
-		if(left.tn.getLength() < dist) {
-		    left.node = (Inner *) exNode.node->left;
+		float diff, dTemp = (*query)[exNode.node->dimension] - exNode.node->split;
+		if(dTemp > 0)
+		    diff = exNode.tn.getUpdatedLength(exNode.node->dimension, dTemp);
+		else
+		    diff = exNode.tn.getLengthSquare();
+		
+		if(diff < dist) {
+		    nleft = exNode.node->left;
 		}
 	    }
 	    
+	    //TODO: I should stop if I'm to high in the tree
 	    //on my way up && not in root
 	    if(exNode.status != NONE && exNode.node->parent) {
-		ExtendedNode<D> add(exNode.node->parent, exNode.tn);
-		//add.tn.set(exNode.node->dimension, abs(exNode.node->split - (*query)[exNode.node->dimension]));
-		
+		ExtendedNode<D> add(exNode.node->parent);
+		add.tn = exNode.tn;
 		if((Inner *) exNode.node->parent->right == exNode.node) 
 		    add.status = RIGHT;
 		else
@@ -289,30 +288,38 @@ public:
 		stack.push(add);	
 	    }
 	    
-	    for(int i = 0; i < 2; i++) {
-		ExtendedNode<D> exN;
-		if(i == 0) exN = left;
-		else exN = right;
+	    // this iterates over 2 children
+	    // a bit mess, but there are too many variables and it does not look
+	    // nice as a method.
+	    for(int c = 0; c <= 1; c++) { 
+		Node * node = (c == 0) ? nleft : nright;
 		
-		if(exN.node) { //check node 
-		    if(exN.node->isLeaf()) {
-			points bucket = ((Leaf<D> *) exN.node)->bucket;
-			for(points_it it = bucket.begin(); it != bucket.end(); ++it) {
-			    (*it)->setColor(255, 255, 0);
-			    float tmp = distance(query, *it);
+		if(node) {
+		    if(node->isLeaf()) { // if node is leaf we search the bucket
+			points *bucket = &((Leaf<D> *) node)->bucket;
+			for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
+			    (*it)->setColor(255, 255, 0); //debug
+			    float tmp = distance(query, *it, false);
 			    if(tmp < dist && tmp > 0) { //ie points are not the same!
 				dist = tmp;
 				nearest = *it;
-				for(int d = 0; d < D; d++) {
-				    window[2*d] = (*query)[d] - dist;
-				    window[2*d + 1] = (*query)[d] + dist;
-				}
 			    }
 			}
 		    }
-		    else {
-			//Not leaf, add Node to the stack
-			exN.status = NONE;
+		    else { //Not leaf, add Node to the stack with correct tracking node
+			ExtendedNode<D> exN((Inner *) node);//, exNode.tn);
+			exN.tn = exNode.tn;
+			if(c == 0) { //LEFT
+			    float d = (*query)[exNode.node->dimension] - exNode.node->split;
+			    if(d > 0)
+				exN.tn.set(exNode.node->dimension, d);
+			}
+			else { //RIGHT
+			    float d = exNode.node->split - (*query)[exNode.node->dimension];
+			    if(d > 0)
+				exN.tn.set(exNode.node->dimension, d);
+			}
+			exN.status = NONE; 
 			stack.push(exN);
 		    }
 		}
