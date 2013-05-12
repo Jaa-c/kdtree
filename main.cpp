@@ -8,6 +8,7 @@
 #include <iostream>
 #include <ctime>
 #include <math.h>
+#include <sys/resource.h>
 #include "PointCloudGenerator.h"
 #include "PlyHandler.h"
 #include "KDTree2Ply.h"
@@ -45,18 +46,39 @@ void runCircular(float * bounds);
 /** runs a lot of knn queries for profiling */
 void runKNN(float * bounds);
 
+/** runs a lot of nn queries for profiling */
+void runNN(float * bounds);
+
 
 int main(int argc, char *argv[]) {
+    const rlim_t kStackSize = 32 * 1024 * 1024;   // min stack size = 16 MB
+    struct rlimit rl;
+    int result;
+
+    result = getrlimit(RLIMIT_STACK, &rl);
+    if (result == 0)
+    {
+       if (rl.rlim_cur < kStackSize)
+       {
+	   rl.rlim_cur = kStackSize;
+	   result = setrlimit(RLIMIT_STACK, &rl);
+	   if (result != 0)
+	   {
+	       fprintf(stderr, "setrlimit returned result = %d\n", result);
+	   }
+       }
+    }
     
     float bounds[2*5] = {0.f, 10.f, 0.f, 12.f, 0.f, 10.f, 1.f, 3.f, 3.f, 9.f};
 
-    //runKNN(bounds);
     
+    runNN(bounds);
     //runCircular(bounds);
+    //runKNN(bounds);
     
     //printKNearest(bounds);
     
-    printBuckets(bounds);
+    //printBuckets(bounds);
     
     //testCircularQuery(bounds);
     
@@ -105,6 +127,19 @@ void runKNN(float * bounds) {
     }
 }
 
+void runNN(float * bounds) {
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generateRandomPoints(1000000, &bounds[0]);
+    
+    KDTree<D> kdtree;
+    kdtree.construct(&points, &bounds[0]);
+    
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+	Point<D> q = *it;
+	kdtree.nearestNeighbor(&q);
+    }
+}
+
 void printBuckets(float * bounds) {
     
     PointCloudGenerator<D> pcg;
@@ -121,7 +156,7 @@ void printBuckets(float * bounds) {
 void compareNNandSimple(float * bounds) {
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generateRandomPoints(50000, &bounds[0]);
+    vector< Point<D> > points = pcg.generateRandomPoints(20000, &bounds[0]);
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
@@ -142,7 +177,16 @@ void compareNNandSimple(float * bounds) {
     float time2 = (clock() - start) / (float) CLOCKS_PER_SEC;
     cout << "  simpleNearestNeighbor time: " << time2 << "s\n";
     
-    cout << "> first method is " << (time2/time) << "x faster.\n";
+    start = clock();
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+	Point<D> q = *it;
+	naiveNN(&q, &points);
+    }
+    float time3 = (clock() - start) / (float) CLOCKS_PER_SEC;
+    cout << "  naiveNN time: " << time3 << "s\n";
+    
+    cout << "> nearestNeighbor method is " << (time2/time) << "x faster than simple and "
+	    << (time3/time) << "x faster than naive.\n";
 
 }
 
@@ -217,10 +261,10 @@ const float distance(const Point<D> * p1, const Point<D>& p2) {
 	float tmp = fabs((*p1)[d] - (p2)[d]);
 	dist += tmp*tmp;
     }
-    return sqrt(dist);
+    return (dist);
 }
 
-Point<D> * naiveNN(Point<D> * query, vector< Point<D> > *data) {
+Point<D> * naiveNN(Point<D> *query, vector< Point<D> > *data) {
     float dist = numeric_limits<float>::max();
     Point<D> * nearest;
     for(typename vector< Point<D> >::iterator it = data->begin(); it != data->end(); ++it) {
