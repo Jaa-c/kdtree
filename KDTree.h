@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <stack>
+#include <queue>
 #include <limits>
 #include <math.h>
 
@@ -247,25 +248,55 @@ public:
      */
     vector< Point<D> * > kNearestNeighbor(const Point<D> *query, const int k) {
 	Leaf<D> *leaf = findBucket(query);
-	float density = leaf->getDensity();
-	float volume = density * k * 1.2;/// 120% of optimal volume
-	float r = pow(volume, 2/3.f); //r square
+	
+	float dist = 0;
+	for(int d = 0; d < D; d++) {
+	    float tmp = leaf->max[d] - leaf->min[d];
+	    dist += tmp * tmp;
+	}
+	float r = sqrt(dist) / 2.0f;
+	
+	int diff = k - leaf->bucket.size();
+	float df = pow(diff, 1 / (float) D);
+	r *= df; // works pretty well
 	
 	vector< Point<D> * > knn;
+	//TODO: check if k > points in tree = infinite loop
+	//TODO> this is certainly not the most efficient solution
+	while(true) { 
+	     knn = circularQuery(query, r);
+	    if(knn.size() > k + 1) {
+		break;
+	    }
+	    else {
+		r *= 1 + 1 / (float) D;
+	    }
+	}
 	
+	sort(knn.begin(), knn.end(), 
+	    [query, this](const Point<D> * a, const Point<D> * b) -> bool { 
+		return distance(a, query) < distance(b, query); 
+	    });
+	    
+	vector< Point<D> * > result;
+	result.insert(result.end(), knn.begin()+1, knn.begin()+1+k);
 	
-	return knn;
+	return result;
     }
     
     /**
      * Returns all points in a hypersphere around given point
+     * 
+     * Basicaly similar implementation to NN, except there is a fixed radius
+     * 
      * @param query center of the sphere
-     * @param r radius of the sphere
+     * @param radius radius of the sphere
      * @return list of points inside
      */
-    vector< Point<D> * > circularQuery(const Point<D> *query, const int r) {
+    vector< Point<D> * > circularQuery(const Point<D> *query, const int radius) {
 	Leaf<D> *leaf = findBucket(query);
 	vector< Point<D> * > data;
+	float r = radius * radius;
 	
 	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {

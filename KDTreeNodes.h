@@ -97,11 +97,11 @@ struct Leaf : Node {
     }
     
     const float getDensity() const {
-	float vol = 0;
+	float vol = 1;
 	for(int d = 0; d < D; d++) {
 	    vol *= max[d] - min[d];
 	}
-	return bucket.size() / vol;
+	return vol / (float)bucket.size();
     }
 
 };

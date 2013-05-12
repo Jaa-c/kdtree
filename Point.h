@@ -29,6 +29,12 @@ struct Point {
 	std::copy(point.color, point.color + 3, color);
     }
     
+    void setColor(int r, int g, int b) {
+	color[0] = r;
+	color[1] = g;
+	color[2] = b;
+    }
+    
     Point& operator= (const Point<D> & point) {
 	Point tmp(point);
 	std::swap(coords, tmp.coords);
@@ -42,12 +48,6 @@ struct Point {
     
     const float& operator[](int idx) const {
 	return coords[idx];
-    }
-    
-    void setColor(int r, int g, int b) {
-	color[0] = r;
-	color[1] = g;
-	color[2] = b;
     }
     
     friend std::ostream& operator<<(std::ostream& out, const Point& p) // output
