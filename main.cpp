@@ -7,6 +7,8 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <ctime>
+#include <math.h>
 #include "PointCloudGenerator.h"
 #include "PlyHandler.h"
 #include "KDTree2Ply.h"
@@ -19,7 +21,7 @@ using namespace std;
 const float distance(const Point<D> * p1, const Point<D>& p2) {
     float dist = 0;
     for(int d = 0; d < D; d++) {
-	float tmp = abs((*p1)[d] - (p2)[d]);
+	float tmp = fabs((*p1)[d] - (p2)[d]);
 	dist += tmp*tmp;
     }
     return sqrt(dist);
@@ -39,14 +41,48 @@ Point<D> * naiveNN(Point<D> * query, vector< Point<D> > *data) {
     return nearest;
 }
 
+
+void comparePerformance() {
+    float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};
+    
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generatePoints(100000, &bounds[0]);
+    
+    KDTree<D> kdtree;
+    kdtree.construct(&points, &bounds[0]);
+    
+    long start = clock();
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+	Point<D> q = *it;
+	kdtree.nearestNeighbor(&q);
+    }
+    float time = (clock() - start) / (float) CLOCKS_PER_SEC;
+    cout << "nearestNeighbor time: " << time << "s\n";
+    
+    start = clock();
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+	Point<D> q = *it;
+	kdtree.simpleNearestNeighbor(&q);
+    }
+    time = (clock() - start) / (float) CLOCKS_PER_SEC;
+    cout << "simpleNearestNeighbor time: " << time << "s\n";
+
+}
+
+
+
 int main(int argc, char *argv[]) {
     
-    float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};//, 0.f, 3.f};
-//    PointCloudGenerator<D> pcg;
-//    vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
-//    PlyHandler::savePoints<D>("data/input.ply", points);
+    comparePerformance();
+    return 0;
     
-    vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
+    float bounds[2*D] = {0.f, 10.f, 0.f, 12.f};//, 0.f, 3.f};
+    
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generatePoints(100000, &bounds[0]);
+    PlyHandler::savePoints<D>("data/input.ply", points);
+    
+//    vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
@@ -59,20 +95,7 @@ int main(int argc, char *argv[]) {
 //    kdtree.insert(&p);
     
     
-    int i;
-    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
-	Point<D> q = *it;
-	//Point<D> * nn = kdtree.simpleNearestNeighbor(&q);
-	Point<D> * nn = kdtree.nearestNeighbor(&q);
-	Point<D> * nnn = naiveNN(&q, &points);
-	if(nn->coords != nnn->coords) {
-	    cout << i << " You got it all wrong!\n";
-	}
-	i++;
-    }    
-    
-    
-//    Point<D> * q = &points[6];
+//    Point<D> * q = &points[87];
 //    Point<D> * nn = kdtree.nearestNeighbor(q);
 //    Point<D> * nnn = naiveNN(q, &points);
 //
@@ -82,9 +105,8 @@ int main(int argc, char *argv[]) {
 //    cout << "nn: " << *nn  << "\n";
 //    cout << "nnn: " << *nnn  << "\n";
     
-        
+    
     KDTree2Ply<D>::saveTree2Ply(&kdtree, &bounds[0], "test-");
     
-    return 0;
 }
 

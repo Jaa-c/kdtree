@@ -120,11 +120,23 @@ class KDTree {
 	Inner* node = root;
 	while(true) {
 	    if((*point)[node->dimension] <= node->split) {
+		if(!node->left) {
+		    if(node->right->isLeaf())
+			return (Leaf<D> *) node->right;
+		    else
+			node = (Inner *) node->right;
+		}
 		if(node->left->isLeaf())
 		    return (Leaf<D> *) node->left;
 		node = (Inner *) node->left;
 	    }
 	    else {
+		if(!node->right) {
+		    if(node->left->isLeaf())
+			return (Leaf<D> *) node->left;
+		    else
+			node = (Inner *) node->left;
+		}
 		if(node->right->isLeaf())
 		    return (Leaf<D> *) node->right;
 		node = (Inner *) node->right;
@@ -141,7 +153,7 @@ class KDTree {
     inline const float distance(const Point<D> * p1, const Point<D> * p2, bool sqrtb = true) {
 	float dist = 0;
 	for(int d = 0; d < D; d++) {
-	    float tmp = abs((*p1)[d] - (*p2)[d]);
+	    float tmp = fabs((*p1)[d] - (*p2)[d]);
 	    dist += tmp*tmp;
 	}
 	if(sqrtb)
@@ -248,7 +260,8 @@ public:
 	    
 	    if(exNode.node->right && (exNode.status != RIGHT || exNode.status == NONE)) {
 		float d = exNode.node->split - (*query)[exNode.node->dimension];
-		right.tn.set(exNode.node->dimension, max(0.0f, d));
+		if(d > 0)
+		    right.tn.set(exNode.node->dimension, d);
 		if(right.tn.getLength() < dist) {
 		    right.node = (Inner *)exNode.node->right;
 		}
@@ -256,7 +269,8 @@ public:
 
 	    if(exNode.node->left && (exNode.status != LEFT || exNode.status == NONE)) {
 		float d = (*query)[exNode.node->dimension] - exNode.node->split;
-		left.tn.set(exNode.node->dimension, max(0.0f, d));
+		if(d > 0)
+		    left.tn.set(exNode.node->dimension,d);
 		if(left.tn.getLength() < dist) {
 		    left.node = (Inner *) exNode.node->left;
 		}

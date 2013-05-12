@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <vector>
+#include <math.h>
 
 
 struct Inner;

@@ -108,7 +108,7 @@ private:
 	
 	data.push_back(p1);
 	data.push_back(p2);
-	if(!node->left->isLeaf()) {
+	if(node->left && !node->left->isLeaf()) {
 	    float b[4];
 	    std::copy(bound, bound + 4, &b[0]);
 	    b[2*node->dimension + 1] = node->split;
@@ -116,7 +116,7 @@ private:
 	    data.insert(data.end(), d.begin(), d.end());
 	}
 	
-	if(!node->right->isLeaf()) {
+	if(node->right && !node->right->isLeaf()) {
 	    float b[4];
 	    std::copy(bound, bound + 4, &b[0]);
 	    b[2*node->dimension] = node->split;
