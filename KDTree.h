@@ -240,6 +240,147 @@ public:
     
     
     /**
+     * Returns exact k-nearest neighbors (kNN).
+     * @param query the point whose kNN we search
+     * @param k the number of points we look for
+     * @return vector op kNN
+     */
+    vector< Point<D> * > kNearestNeighbor(const Point<D> *query, const int k) {
+	Leaf<D> *leaf = findBucket(query);
+	float density = leaf->getDensity();
+	float volume = density * k * 1.2;/// 120% of optimal volume
+	float r = pow(volume, 2/3.f); //r square
+	
+	vector< Point<D> * > knn;
+	
+	
+	return knn;
+    }
+    
+    /**
+     * Returns all points in a hypersphere around given point
+     * @param query center of the sphere
+     * @param r radius of the sphere
+     * @return list of points inside
+     */
+    vector< Point<D> * > circularQuery(const Point<D> *query, const int r) {
+	Leaf<D> *leaf = findBucket(query);
+	vector< Point<D> * > data;
+	
+	//find nearest point in the bucket
+	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
+	    float tmp = distance(query, *it);
+	    if(tmp < r) { //ie points are not the same!
+		data.push_back(*it);
+	    }
+	}
+	
+	ExtendedNode<D> firstNode(leaf->parent);
+	if((Leaf<D> *)leaf->parent->left == leaf)
+	    firstNode.status = LEFT;
+	else
+	    firstNode.status = RIGHT;
+	
+	stack< ExtendedNode<D> > stack; //avoid recursion
+	stack.push(firstNode);
+	
+	// check possible nodes for NN
+	while(!stack.empty()) { 
+	    ExtendedNode<D> exNode = stack.top();
+	    stack.pop();
+	    	    
+	    Node * nleft = NULL;
+	    Node * nright = NULL;
+	    float ldiff, rdiff, ladd, radd;
+	    
+	    /// if right child exist && it has not been searchd yet
+	    if(exNode.node->right && (exNode.status != RIGHT || exNode.status == NONE)) {
+		radd = exNode.node->split - (*query)[exNode.node->dimension];
+		if(radd > 0) // only if I'm "crossing line from left to right"
+		    rdiff = exNode.tn.getUpdatedLength(exNode.node->dimension, radd);
+		else
+		    rdiff = exNode.tn.getLengthSquare();
+		
+		if(rdiff < r) { //if there possibly can be nearer point than current nearest
+		    nright = exNode.node->right;
+		}
+	    }
+	    /// if left child exist && it has not been searchd yet
+	    if(exNode.node->left && (exNode.status != LEFT || exNode.status == NONE)) {
+		ladd = (*query)[exNode.node->dimension] - exNode.node->split;
+		if(ladd > 0)
+		    ldiff = exNode.tn.getUpdatedLength(exNode.node->dimension, ladd);
+		else
+		    ldiff = exNode.tn.getLengthSquare();
+		
+		if(ldiff < r) {
+		    nleft = exNode.node->left;
+		}
+	    }
+	    
+	    //TODO: I should stop if I'm to high in the tree
+	    //on my way up && not in root
+	    if(exNode.status != NONE && exNode.node->parent) {
+		ExtendedNode<D> add(exNode.node->parent);
+		add.tn = exNode.tn;
+		if((Inner *) exNode.node->parent->right == exNode.node) 
+		    add.status = RIGHT;
+		else
+		    add.status = LEFT;
+
+		stack.push(add);
+	    }
+	    
+	    // this iterates over 2 children
+	    // a bit mess, but there are too many variables and it does not look
+	    // nice as a method.
+	    for(int c = 0; c <= 1; c++) { 
+		Node * node;
+		float add;
+		//path ordering, choose the worse first so
+		//the better will be first to pop of the stack
+		if(c == 0) { 
+		    node = (ldiff >= rdiff) ? nleft : nright;
+		    add = (ldiff >= rdiff) ? ladd : radd;
+		}
+		else { //in second iteration, choose the better (=the other node)
+		    node = (ldiff < rdiff) ? nleft : nright;
+		    add = (ldiff < rdiff) ? ladd : radd;
+		}
+		
+		if(node) {
+		    if(node->isLeaf()) { // if node is leaf we search the bucket
+			Leaf<D> * leaf = (Leaf<D> *) node;
+			///BOB test
+			if(minBoundsDistance(query, leaf->min, leaf->max) < r) {
+			    points *bucket = &leaf->bucket;
+			    for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
+				float tmp = distance(query, *it);
+				if(tmp < r) { //ie points are not the same!
+				    data.push_back(*it);
+				}
+			    }
+			}
+		    }
+		    else { //Not leaf, add Node to the stack with correct tracking node
+			ExtendedNode<D> newN((Inner *) node);
+			newN.tn = exNode.tn;
+			if(add > 0)
+			    newN.tn.set(exNode.node->dimension, add);
+			newN.status = NONE; 
+			if(newN.tn.getLengthSquare() < r) { //check if the dist hasn't changed
+			    stack.push(newN);
+			}
+		    }
+		}
+	    }
+	}
+    
+	return data;
+    }
+    
+    
+    /**
      * Returns the exact nearest neighbor (NN).
      * If there are more NNs, method retuns one random.
      * @param query the point whose NN we search

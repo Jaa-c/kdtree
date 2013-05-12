@@ -15,7 +15,7 @@
 
 using namespace std;
 
-#define D 5
+#define D 2
 
 const float distance(const Point<D> * p1, const Point<D>& p2) {
     float dist = 0;
@@ -92,13 +92,36 @@ void compareNNandSimple(float * bounds) {
 
 }
 
+void testCircularQuery(float * bounds) {
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generatePoints(1000, &bounds[0]);
+    
+    KDTree<D> kdtree;
+    kdtree.construct(&points, &bounds[0]);
+
+    Point<D> * p =  &points[13];
+    const float radius = 3.0;
+    vector< Point<D> * > result = kdtree.circularQuery(p, radius);
+    cout << "found " << result.size() << " points in the query\n";
+    
+    for(vector< Point<D> *>::iterator it = result.begin(); it != result.end(); ++it) {
+	(*it)->setColor(0, 0, 255);
+    }
+    p->setColor(255, 0, 0);
+    
+    PlyHandler::savePoints<D>("data/circularQuery.ply", points);
+    
+}
+
 
 
 int main(int argc, char *argv[]) {
     
     float bounds[2*5] = {0.f, 10.f, 0.f, 12.f, 0.f, 10.f, 1.f, 3.f, 3.f, 9.f};
     
-    compareNNandSimple(bounds);
+    testCircularQuery(bounds);
+    
+    //compareNNandSimple(bounds);
     
     //testNNCorrectness(bounds);
 	    

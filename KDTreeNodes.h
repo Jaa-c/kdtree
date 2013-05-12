@@ -95,6 +95,14 @@ struct Leaf : Node {
 	    if(p[d] < min[d]) min[d] = p[d];
 	}
     }
+    
+    const float getDensity() const {
+	float vol = 0;
+	for(int d = 0; d < D; d++) {
+	    vol *= max[d] - min[d];
+	}
+	return bucket.size() / vol;
+    }
 
 };
 
