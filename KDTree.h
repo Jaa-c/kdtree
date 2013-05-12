@@ -123,8 +123,10 @@ class KDTree {
 		if(!node->left) {
 		    if(node->right->isLeaf())
 			return (Leaf<D> *) node->right;
-		    else
+		    else {
 			node = (Inner *) node->right;
+			continue;
+		    }
 		}
 		if(node->left->isLeaf())
 		    return (Leaf<D> *) node->left;
@@ -134,8 +136,10 @@ class KDTree {
 		if(!node->right) {
 		    if(node->left->isLeaf())
 			return (Leaf<D> *) node->left;
-		    else
+		    else {
 			node = (Inner *) node->left;
+			continue;
+		    }
 		}
 		if(node->right->isLeaf())
 		    return (Leaf<D> *) node->right;
