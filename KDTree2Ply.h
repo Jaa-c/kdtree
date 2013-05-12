@@ -35,6 +35,35 @@ public:
 	
 	if(D != 2) return;
 	data = debugTree(tree->getRoot(), bounds);
+	
+	Point<D> p;
+	p[0] = bounds[0];
+	p[1] = bounds[2];
+	data.push_back(p);
+	p[0] = bounds[0];
+	p[1] = bounds[3];
+	data.push_back(p);
+	
+	p[0] = bounds[0];
+	p[1] = bounds[3];
+	data.push_back(p);
+	p[0] = bounds[1];
+	p[1] = bounds[3];
+	data.push_back(p);
+	
+	p[0] = bounds[1];
+	p[1] = bounds[3];
+	data.push_back(p);
+	p[0] = bounds[1];
+	p[1] = bounds[2];
+	data.push_back(p);
+	
+	p[0] = bounds[1];
+	p[1] = bounds[2];
+	data.push_back(p);
+	p[0] = bounds[0];
+	p[1] = bounds[2];
+	data.push_back(p);
 	PlyHandler::saveLines<D>(name + "lines.ply", data);
     }
     
@@ -90,24 +119,19 @@ private:
     static vector< Point<D> > debugTree(const Inner* node, const float* bound) {
 	vector< Point<D> > data;
 	if(D != 2) return data;
-	Point<D> p1;
-	p1[0] = bound[0];
-	p1[1] = bound[2];
-	p1[node->dimension] = node->split;
-	p1.color[0] = 255;
-	p1.color[1] = 255;
-	p1.color[2] = 255;
 	
-	Point<D> p2;
-	p2[0] = bound[1];
-	p2[1] = bound[3];
-	p2[node->dimension] = node->split;
-	p2.color[0] = 255;
-	p2.color[1] = 255;
-	p2.color[2] = 255;
+	Point<D> p;
+	p.setColor(255, 255, 255);
+	p[0] = bound[0];
+	p[1] = bound[2];
+	p[node->dimension] = node->split;
+	data.push_back(p);
 	
-	data.push_back(p1);
-	data.push_back(p2);
+	p[0] = bound[1];
+	p[1] = bound[3];
+	p[node->dimension] = node->split;
+	data.push_back(p);
+	
 	if(node->left && !node->left->isLeaf()) {
 	    float b[4];
 	    std::copy(bound, bound + 4, &b[0]);

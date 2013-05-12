@@ -27,7 +27,7 @@ Point<D> * naiveNN(Point<D> * query, vector< Point<D> > *data);
 /** Tests if kd-tree nearest neigbor returns the smae as naive NN */
 void testNNCorrectness(float * bounds);
 
-/** Compares optimizde and simeple NN in kd-tree*/
+/** Compares optimized and simeple NN in kd-tree*/
 void compareNNandSimple(float * bounds);
 
 /** Does circular query on data and prints data to output folder */
@@ -39,11 +39,24 @@ void printKNearest(float * bounds);
 /** prints tree (colored buckets) + splitting lines */
 void printBuckets(float * bounds);
 
+/** runs a lot of circular queries for profiling */
+void runCircular(float * bounds);
+
+/** runs a lot of knn queries for profiling */
+void runKNN(float * bounds);
+
+
 int main(int argc, char *argv[]) {
     
     float bounds[2*5] = {0.f, 10.f, 0.f, 12.f, 0.f, 10.f, 1.f, 3.f, 3.f, 9.f};
+
+    //runKNN(bounds);
     
-    printKNearest(bounds);
+    //runCircular(bounds);
+    
+    //printKNearest(bounds);
+    
+    printBuckets(bounds);
     
     //testCircularQuery(bounds);
     
@@ -54,52 +67,61 @@ int main(int argc, char *argv[]) {
     return 0;
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generatePoints(10000, &bounds[0]);
-    PlyHandler::savePoints<D>("data/input.ply", points);
+    vector< Point<D> > points = pcg.generateNormalPoints(10000);
+    PlyHandler::savePoints<D>( output_dir + "gauss.ply", points);
     
 //    vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
+    
+}
+
+void runCircular(float * bounds) {
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generateRandomPoints(10000, &bounds[0]);
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
     
-    KDTree2Ply<D>::saveTree2Ply(&kdtree, &bounds[0]);
-     
-//    Point<2> p;
-//    p.coords[0] = 9;
-//    p.coords[1] = 0;
-//    kdtree.insert(&p);
-    
-    
-    Point<D> * q = &points[87];
-    Point<D> * nn = kdtree.nearestNeighbor(q);
-    Point<D> * nnn = naiveNN(q, &points);
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+	Point<D> q = *it;
+	kdtree.circularQuery(&q, 3.0f);
+    }
+}
 
-    nn->setColor(0, 0, 255);
-    q->setColor(255, 0, 0);
-    cout << "q:" << *q << "\n";
-    cout << "nn: " << *nn  << "\n";
-    cout << "nnn: " << *nnn  << "\n";
+void runKNN(float * bounds) {
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generateRandomPoints(10000, &bounds[0]);
     
-    KDTree2Ply<D>::saveTree2Ply(&kdtree, &bounds[0], "test-");
+    KDTree<D> kdtree;
+    kdtree.construct(&points, &bounds[0]);
     
+    const int nns = 50;
+    
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+	Point<D> q = *it;
+	vector< Point<D> *> data = kdtree.kNearestNeighbor(&q, nns);
+	if(data.size() != nns) {
+	    cerr << "error!, returned " << data.size() << " instead of " << nns << " points\n";
+	}
+    }
 }
 
 void printBuckets(float * bounds) {
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generatePoints(100, &bounds[0]);
+    //vector< Point<D> > points = pcg.generateRandomPoints(100, &bounds[0]);
+    vector< Point<D> > points = pcg.generateNormalPoints(100);
     
     KDTree<D> kdtree;
-    kdtree.construct(&points, &bounds[0]);
-    
-    KDTree2Ply<D>::saveTree2Ply(&kdtree, &bounds[0], output_dir + "tree-");
+    kdtree.construct(&points);
+        
+    KDTree2Ply<D>::saveTree2Ply(&kdtree, kdtree.getBoundingBox(), output_dir + "tree-", true);
 
 }
 
 void compareNNandSimple(float * bounds) {
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generatePoints(50000, &bounds[0]);
+    vector< Point<D> > points = pcg.generateRandomPoints(50000, &bounds[0]);
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
@@ -126,7 +148,7 @@ void compareNNandSimple(float * bounds) {
 
 void printCircularQuery(float * bounds) {
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generatePoints(1000, &bounds[0]);
+    vector< Point<D> > points = pcg.generateRandomPoints(1000, &bounds[0]);
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
@@ -148,7 +170,7 @@ void printCircularQuery(float * bounds) {
 
 void printKNearest(float * bounds) {
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generatePoints(1000, &bounds[0]);
+    vector< Point<D> > points = pcg.generateRandomPoints(1000, &bounds[0]);
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
@@ -169,7 +191,7 @@ void printKNearest(float * bounds) {
 void testNNCorrectness(float * bounds) {
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generatePoints(5000, &bounds[0]);;
+    vector< Point<D> > points = pcg.generateRandomPoints(5000, &bounds[0]);;
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);

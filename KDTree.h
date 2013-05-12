@@ -37,6 +37,9 @@ class KDTree {
     /** number of points inside the tree */
     int size;
     
+    /** bounding box of the tree, format: xmin, xmax, ymin, ymax, ...*/
+    float boundingBox[2*D];
+    
     /**
      * Recursive construction of the tree
      * @param data Set on unordered points
@@ -44,6 +47,7 @@ class KDTree {
      * @param parent parent node
      */
     void construct(points * data, float * bounds, Inner* parent)  {
+	
 	int dim = -1; //dimension to split
 	float size = 0;
 	for(int i = 0; i < D; i++) {
@@ -210,29 +214,56 @@ public:
      *  Builds the KD-Tree on a given set of points
      * 
      * @param[in] data vector of pointers to unordered points
-     * @param[in] dataSize size od given array
      * @param[in] bounds array with bounds of the coordinates \
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
      */
     void construct(points * data, float * bounds) {
+	copy(bounds, bounds + 2*D, boundingBox);
 	size = data->size();
 	construct(data, bounds, root);
+    }
+    
+    /**
+     *  Builds the KD-Tree on a given set of points with unknown bounds
+     * 
+     * @param[in] data vector of pointers to unordered points
+     */
+    void construct(points * data) {
+	float bounds[2*D];
+	for(int d = 0; d < D; d++) {
+	    bounds[2*d] = numeric_limits<float>::max();
+	    bounds[2*d + 1] = numeric_limits<float>::min();
+	}
+	
+	for(points_it it = data->begin(); it != data->end(); ++it) {
+	    Point<D> *p = *it;
+	    for(int d = 0; d < D; d++) {
+		if((*p)[d] < bounds[2*d]) bounds[2*d] = (*p)[d];
+		if((*p)[d] > bounds[2*d + 1]) bounds[2*d + 1] = (*p)[d];
+	    }
+	}
+	
+	copy(bounds, bounds + 2*D, boundingBox);
+	size = data->size();
+	construct(data, &bounds[0], root);
     }
     
     /**
      *  Builds the KD-Tree on a given set of points
      * 
      * @param[in] data vector of unordered points
-     * @param[in] dataSize size od given array
      * @param[in] bounds array with bounds of the coordinates \
      *		  expects array like this - 2D: [xmin, xmax, ymin, ymax]
      */
-    void construct(vector< Point<D> > * data, float * bounds) {
+    void construct(vector< Point<D> > * data, float * bounds = NULL) {
 	vector< Point<D>* > pointers;
 	for(typename vector< Point<D> >::iterator it = data->begin(); it != data->end(); ++it) {
 	    pointers.push_back(&(*it));
 	}
-	construct(&pointers, bounds);
+	if(bounds)
+	    construct(&pointers, bounds);
+	else
+	    construct(&pointers);
     }
     
     /**
@@ -241,6 +272,14 @@ public:
      */
     const Inner *getRoot() const {
 	return root;
+    }
+    
+    /**
+     * Bounding box of the tree
+     * @return array of size 2D, format: xmin, xmax, ymin, ymax, ...
+     */
+    const float *getBoundingBox() const {
+	return &boundingBox[0];
     }
     
     
@@ -258,6 +297,11 @@ public:
 	    float tmp = leaf->max[d] - leaf->min[d];
 	    dist += tmp * tmp;
 	}
+	
+	if(dist == 0) { //bucket has only 1 point, so lets just find NN
+	    dist = distance(leaf->bucket[0], nearestNeighbor(query));
+	}
+	
 	float r = sqrt(dist) / 2.0f;
 	
 	int diff = k - leaf->bucket.size();
@@ -269,13 +313,13 @@ public:
 	vector< Point<D> * > knn;
 	
 	//TODO: this is certainly not the most efficient solution
-	while(true) { 
+	for(int i = 100; i > 1; i--) { 
 	     knn = circularQuery(query, r);
 	    if(knn.size() > k + 1 || knn.size() == size) {
 		break;
 	    }
 	    else {
-		r *= 1 + 1 / (float) D;
+		r *= 1 + (1 / (float) D) + (1 / (float) i);
 	    }
 	}
 	
@@ -285,7 +329,10 @@ public:
 	    });
 	    
 	vector< Point<D> * > result;
-	result.insert(result.end(), knn.begin()+1, knn.begin()+1+k);
+	
+	int size =  (k + 1 < knn.size()) ? k + 1 : knn.size();
+	
+	result.insert(result.end(), knn.begin() + 1, knn.begin() + size);
 	
 	return result;
     }
