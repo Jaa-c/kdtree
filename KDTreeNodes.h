@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <vector>
+#include <limits>
 #include <math.h>
 
 
@@ -66,10 +67,35 @@ struct Inner : Node {
  */
 template<const int D = 3>
 struct Leaf : Node {
-    std::vector< Point<D>* > bucket;
+    std::vector< Point<D> * > bucket;
+    /** lower bound, BOB test */
+    float min[D]; 
+    /** upper bound, BOB test */
+    float max[D]; 
     
-    Leaf(Inner *parent, std::vector< Point<D>* > bucket) : Node(true, parent), bucket(bucket) {}
+    Leaf(Inner *parent, std::vector< Point<D>* > bucket) : Node(true, parent), bucket(bucket) {
+	for(int d = 0; d < D; d++) {
+	    min[d] = std::numeric_limits<float>::max();
+	    max[d] = 0;
+	}
+	for(typename std::vector< Point<D> * >::iterator it = bucket.begin(); it!= bucket.end(); ++it) {
+	    Point<D> * p = *it;
+	    for(int d = 0; d < D; d++) {
+		if((*p)[d] > max[d]) max[d] = (*p)[d];
+		if((*p)[d] < min[d]) min[d] = (*p)[d];
+	    }
+	}
+    }
     ~Leaf() {}
+    
+    void add(Point<D> * p) {
+	bucket.push_back(p);
+	for(int d = 0; d < D; d++) {
+	    if(p[d] > max[d]) max[d] = p[d];
+	    if(p[d] < min[d]) min[d] = p[d];
+	}
+    }
+
 };
 
 template<const int D = 3>

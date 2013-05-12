@@ -148,9 +148,10 @@ class KDTree {
      * Calculates distance
      * @param p1
      * @param p2
+     * @param sqrtb if false, the returned distance is squared
      * @return 
      */
-    inline const float distance(const Point<D> * p1, const Point<D> * p2, bool sqrtb = true) {
+    inline const float distance(const Point<D> * p1, const Point<D> * p2, bool sqrtb = false) {
 	float dist = 0;
 	for(int d = 0; d < D; d++) {
 	    float tmp = fabs((*p1)[d] - (*p2)[d]);
@@ -160,6 +161,28 @@ class KDTree {
 	    return sqrt(dist);
 	else
 	    return dist;
+    }
+    
+    /**
+     * Gets distance from given point to defined hyper rectangle
+     * @param point query point
+     * @param min min coords of a hyper reectangle
+     * @param max max coords of a hyper reectangle
+     * @return squared distance
+     */
+    inline const float minBoundsDistance(const Point<D> * point, const float * min, const float * max) {
+	float dist = 0;
+	for(int d = 0; d < D; d++) {
+	    if ((*point)[d] < min[d]) {
+		const float tmp = min[d] - (*point)[d];
+		dist += tmp*tmp;
+	    } 
+	    else if ((*point)[d] > max[d]) {
+		const float tmp = max[d] - (*point)[d];
+		dist += tmp*tmp;
+	    }
+	}
+	return dist;
     }
     
     
@@ -228,7 +251,7 @@ public:
 	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
 	    (*it)->setColor(0, 255, 0);
-	    float tmp = distance(query, *it, false);
+	    float tmp = distance(query, *it);
 	    if(tmp < dist && tmp > 0) { //ie points are not the same!
 		dist = tmp;
 		nearest = *it;
@@ -310,13 +333,17 @@ public:
 		
 		if(node) {
 		    if(node->isLeaf()) { // if node is leaf we search the bucket
-			points *bucket = &((Leaf<D> *) node)->bucket;
-			for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
-			    (*it)->setColor(255, 255, 0); //debug
-			    float tmp = distance(query, *it, false);
-			    if(tmp < dist && tmp > 0) { //ie points are not the same!
-				dist = tmp;
-				nearest = *it;
+			Leaf<D> * leaf = (Leaf<D> *) node;
+			///BOB test
+			if(minBoundsDistance(query, leaf->min, leaf->max) < dist) {
+			    points *bucket = &leaf->bucket;
+			    for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
+				(*it)->setColor(255, 255, 0); //debug
+				float tmp = distance(query, *it);
+				if(tmp < dist && tmp > 0) { //ie points are not the same!
+				    dist = tmp;
+				    nearest = *it;
+				}
 			    }
 			}
 		    }
@@ -345,7 +372,7 @@ public:
     void insert(Point<D> *point) { //TODO: insert to empty tree
 	Leaf<D> * leaf = findBucket(point);
 	if(leaf->bucket.size() < bucketSize) {
-	    leaf->bucket.push_back(point);
+	    leaf->add(point);
 	    return; //OK, bucket is not full yet
 	}
 	else { //split the bucket into 2 new leaves
@@ -428,7 +455,7 @@ public:
 	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
 	    (*it)->setColor(0, 255, 0);
-	    float tmp = distance(query, *it);
+	    float tmp = distance(query, *it, true);
 	    if(tmp < dist && tmp > 0) { //ie points are not the same!
 		dist = tmp;
 		nearest = *it;
@@ -481,7 +508,7 @@ public:
 			points bucket = ((Leaf<D> *)(nodes[i]))->bucket;
 			for(points_it it = bucket.begin(); it != bucket.end(); ++it) {
 			    //(*it)->setColor(255, 255, 0);
-			    float tmp = distance(query, *it);
+			    float tmp = distance(query, *it, true);
 			    if(tmp < dist && tmp > 0) { //ie points are not the same!
 				dist = tmp;
 				nearest = *it;
