@@ -42,20 +42,23 @@ Point<D> * naiveNN(Point<D> * query, vector< Point<D> > *data) {
 void testNNCorrectness(float * bounds) {
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generatePoints(10000, &bounds[0]);;
+    vector< Point<D> > points = pcg.generatePoints(5000, &bounds[0]);;
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
-    
+    bool ok = true;
     for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
 	Point<D> q = *it;
 	Point<D> * nn = kdtree.nearestNeighbor(&q);
 	Point<D> * nnn = naiveNN(&q, &points);
 	if(nn->coords != nnn->coords) {
 	   cout << "You got it all wrong!\n";
+	   ok = false;
 	}
     } 
     
+    if(ok) cout << "everything seems to be OK!\n";
+    else   cout << "there are some errors :(\n";
     cout << "testNNCorrectness - DONE!\n";
 
 }
@@ -75,15 +78,17 @@ void compareNNandSimple(float * bounds) {
 	kdtree.nearestNeighbor(&q);
     }
     float time = (clock() - start) / (float) CLOCKS_PER_SEC;
-    cout << "nearestNeighbor time: " << time << "s\n";
+    cout << "  nearestNeighbor time: " << time << "s\n";
     
     start = clock();
     for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
 	Point<D> q = *it;
 	kdtree.simpleNearestNeighbor(&q);
     }
-    time = (clock() - start) / (float) CLOCKS_PER_SEC;
-    cout << "simpleNearestNeighbor time: " << time << "s\n";
+    float time2 = (clock() - start) / (float) CLOCKS_PER_SEC;
+    cout << "  simpleNearestNeighbor time: " << time2 << "s\n";
+    
+    cout << "> first method is " << (time2/time) << "x faster.\n";
 
 }
 

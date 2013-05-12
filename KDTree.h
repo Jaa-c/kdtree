@@ -220,7 +220,9 @@ public:
      */
     Point<D> * nearestNeighbor(const Point<D> *query) {
 	Leaf<D> *leaf = findBucket(query);
+	/** squared distance of the current nearest neigbor */
 	float dist = numeric_limits<float>::max();
+	/** current best NN */
 	Point<D> * nearest;
 	
 	//find nearest point in the bucket
@@ -249,28 +251,29 @@ public:
 	    	    
 	    Node * nleft = NULL;
 	    Node * nright = NULL;
+	    float ldiff, rdiff, ladd, radd;
 	    
 	    /// if right child exist && it has not been searchd yet
 	    if(exNode.node->right && (exNode.status != RIGHT || exNode.status == NONE)) {
-		float diff, dTemp = exNode.node->split - (*query)[exNode.node->dimension];
-		if(dTemp > 0) // only if I'm "crossing line from left to right"
-		    diff = exNode.tn.getUpdatedLength(exNode.node->dimension, dTemp);
+		radd = exNode.node->split - (*query)[exNode.node->dimension];
+		if(radd > 0) // only if I'm "crossing line from left to right"
+		    rdiff = exNode.tn.getUpdatedLength(exNode.node->dimension, radd);
 		else
-		    diff = exNode.tn.getLengthSquare();
+		    rdiff = exNode.tn.getLengthSquare();
 		
-		if(diff < dist) { //if there possibly can be nearer point than current nearest
+		if(rdiff < dist) { //if there possibly can be nearer point than current nearest
 		    nright = exNode.node->right;
 		}
 	    }
 	    /// if left child exist && it has not been searchd yet
 	    if(exNode.node->left && (exNode.status != LEFT || exNode.status == NONE)) {
-		float diff, dTemp = (*query)[exNode.node->dimension] - exNode.node->split;
-		if(dTemp > 0)
-		    diff = exNode.tn.getUpdatedLength(exNode.node->dimension, dTemp);
+		ladd = (*query)[exNode.node->dimension] - exNode.node->split;
+		if(ladd > 0)
+		    ldiff = exNode.tn.getUpdatedLength(exNode.node->dimension, ladd);
 		else
-		    diff = exNode.tn.getLengthSquare();
+		    ldiff = exNode.tn.getLengthSquare();
 		
-		if(diff < dist) {
+		if(ldiff < dist) {
 		    nleft = exNode.node->left;
 		}
 	    }
@@ -285,14 +288,25 @@ public:
 		else
 		    add.status = LEFT;
 
-		stack.push(add);	
+		stack.push(add);
 	    }
 	    
 	    // this iterates over 2 children
 	    // a bit mess, but there are too many variables and it does not look
 	    // nice as a method.
 	    for(int c = 0; c <= 1; c++) { 
-		Node * node = (c == 0) ? nleft : nright;
+		Node * node;
+		float add;
+		//path ordering, choose the worse first so
+		//the better will be first to pop of the stack
+		if(c == 0) { 
+		    node = (ldiff >= rdiff) ? nleft : nright;
+		    add = (ldiff >= rdiff) ? ladd : radd;
+		}
+		else { //in second iteration, choose the better (=the other node)
+		    node = (ldiff < rdiff) ? nleft : nright;
+		    add = (ldiff < rdiff) ? ladd : radd;
+		}
 		
 		if(node) {
 		    if(node->isLeaf()) { // if node is leaf we search the bucket
@@ -307,20 +321,14 @@ public:
 			}
 		    }
 		    else { //Not leaf, add Node to the stack with correct tracking node
-			ExtendedNode<D> exN((Inner *) node);//, exNode.tn);
-			exN.tn = exNode.tn;
-			if(c == 0) { //LEFT
-			    float d = (*query)[exNode.node->dimension] - exNode.node->split;
-			    if(d > 0)
-				exN.tn.set(exNode.node->dimension, d);
+			ExtendedNode<D> newN((Inner *) node);
+			newN.tn = exNode.tn;
+			if(add > 0)
+			    newN.tn.set(exNode.node->dimension, add);
+			newN.status = NONE; 
+			if(newN.tn.getLengthSquare() < dist) { //check if the dist hasn't changed
+			    stack.push(newN);
 			}
-			else { //RIGHT
-			    float d = exNode.node->split - (*query)[exNode.node->dimension];
-			    if(d > 0)
-				exN.tn.set(exNode.node->dimension, d);
-			}
-			exN.status = NONE; 
-			stack.push(exN);
 		    }
 		}
 	    }
