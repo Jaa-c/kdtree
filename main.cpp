@@ -52,13 +52,16 @@ void runKNN(float * bounds);
 /** runs a lot of nn queries for profiling */
 void runNN(float * bounds);
 
+/** compare time of NN search based on data distribution */
+void compareNNonDatasets();
+
 
 int main(int argc, char *argv[]) {
         
     float bounds[2*5] = {0.f, 10.f, 0.f, 12.f, 0.f, 10.f, 1.f, 3.f, 3.f, 9.f};
 
-    
-    compareNNandSimple();
+    compareNNonDatasets();
+    //compareNNandSimple();
     
     
     //runNN(bounds);
@@ -82,6 +85,74 @@ int main(int argc, char *argv[]) {
     
 //    vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
     
+}
+
+void compareNNonDatasets() {
+    vector< Point<D> > points;
+    string dir = "/home/jaa/Dokumenty/FEL/BP/modely/stodulky/";
+    const int count  = 50000;
+        
+    struct timeval start, end;
+    long seconds, useconds;  
+    long time1, time2, time3;
+    
+    ///foreach files in folder and test it on various real data sets
+    vector< Point<D> > temp = PlyHandler::load<D>(dir + "option-0000.ply");
+    points.insert(points.end(), temp.begin(), temp.end());
+    temp = PlyHandler::load<D>(dir + "option-0001.ply");
+    points.insert(points.end(), temp.begin(), temp.end());
+    temp = PlyHandler::load<D>(dir + "option-0002.ply");
+    points.insert(points.end(), temp.begin(), temp.end());
+    
+    const int size = points.size();
+    
+    KDTree<D> real;
+    real.construct(&points);
+    
+    gettimeofday(&start, NULL);
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.begin() + count; ++it) {
+	Point<D> *p = real.nearestNeighbor(&(*it));
+    }
+    gettimeofday(&end, NULL);
+    
+    seconds  = end.tv_sec  - start.tv_sec;
+    useconds = end.tv_usec - start.tv_usec;
+    time1 = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+    cout << "  real data time: " << time1 << "ms\n";
+    
+
+    PointCloudGenerator<D> pcg;
+    points = pcg.generateNormalPoints(size);
+    KDTree<D> normal;
+    normal.construct(&points);
+    
+    gettimeofday(&start, NULL);
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.begin() + count; ++it) {
+	Point<D> *p = normal.nearestNeighbor(&(*it));
+    }
+    gettimeofday(&end, NULL);
+    
+    seconds  = end.tv_sec  - start.tv_sec;
+    useconds = end.tv_usec - start.tv_usec;
+    time2 = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+    cout << "  normal data time: " << time2 << "ms\n";
+        
+    
+    points = pcg.generateRandomPoints(size);
+    KDTree<D> random;
+    random.construct(&points);
+    
+    gettimeofday(&start, NULL);
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.begin() + count; ++it) {
+	Point<D> *p = random.nearestNeighbor(&(*it));
+    }
+    gettimeofday(&end, NULL);
+    
+    seconds  = end.tv_sec  - start.tv_sec;
+    useconds = end.tv_usec - start.tv_usec;
+    time3 = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+    cout << "  normal data time: " << time3 << "ms\n";
+
 }
 
 void testSlidingMidPoint() {
