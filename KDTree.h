@@ -82,20 +82,22 @@ class KDTree {
 	    }
 	    float split = bounds[2*dim] + size / 2.0f; //split value
 
-	    points left, right; //TODO: is this local?
-	    float lmax = 0, rmin = numeric_limits<float>::max();
+	    points left, right;
+	    float lmax = -1000000, rmin = 1000000; //TODO
 
 	    for(points_it it = data->begin(); it != data->end(); ++it) {
 		Point<D> *p = (*it);
 		if((*p)[dim] <= split) { //NOTE: points exactly on split line belong to left node!
 		    left.push_back(*it);
-		    if((*p)[dim] > lmax)
-			lmax = (*p)[dim];
+		    float tmp = (*p)[dim];
+		    if(tmp > lmax)
+			lmax = tmp;
 		}
 		if((*p)[dim] > split) {
 		    right.push_back(*it);
-		    if((*p)[dim] < rmin)
-			rmin = (*p)[dim];
+		    float tmp = (*p)[dim];
+		    if(tmp < rmin)
+			rmin = tmp;
 		}
 	    }
 	    //sliding midpoint split
