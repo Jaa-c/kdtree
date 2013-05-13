@@ -30,6 +30,8 @@ struct Node {
 	return leaf;
     }
     
+    virtual ~Node() {}
+    
 protected:
     /** Constructor for child classes */
     Node(const bool leaf, Inner* parent) : leaf(leaf), parent(parent) {}

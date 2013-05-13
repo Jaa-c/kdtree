@@ -533,7 +533,7 @@ public:
 	    	    
 	    Node * nleft = NULL;
 	    Node * nright = NULL;
-	    float ldiff, rdiff, ladd, radd;
+	    float ldiff = 0, rdiff = 0, ladd = 0, radd = 0;
 	    
 	    /// if right child exist && it has not been searchd yet
 	    if(exNode.node->right && (exNode.status != RIGHT || exNode.status == NONE)) {
@@ -765,8 +765,8 @@ public:
 	    for(int i = 0; i < 2; i++) {
 		if(nodes[i]) { //check node 
 		    if((nodes[i])->isLeaf()) {
-			points bucket = ((Leaf<D> *)(nodes[i]))->bucket;
-			for(points_it it = bucket.begin(); it != bucket.end(); ++it) {
+			points *bucket = &((Leaf<D> *)(nodes[i]))->bucket;
+			for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
 			    //(*it)->setColor(255, 255, 0);
 			    float tmp = distance(query, *it, true);
 			    if(tmp < dist && tmp > 0) { //ie points are not the same!

@@ -46,6 +46,20 @@ public:
 	return points;
     }
     
+    std::vector< Point<D> > generateRandomPoints(int count) {
+	std::vector< Point<D> > points;
+	for(int i = 0; i < count; i++) {
+	    Point<D> p;
+	    for(int d = 0; d < D; d++) {
+		int min = 0;
+		int max = 1;
+		p[d] = randomFloat(min, max);
+	    }
+	    points.push_back(p);
+	}
+	return points;
+    }
+    
     std::vector< Point<D> > generateNormalPoints(int count) {
 //	const int mu = 0; //the mean
 //	const int sigma = 1; //enter the standard deviation you want or need

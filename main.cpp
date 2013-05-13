@@ -6,7 +6,7 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <ctime>
+#include <sys/time.h>
 #include <math.h>
 #include <sys/resource.h>
 #include "PointCloudGenerator.h"
@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define D 2
+#define D 3
 
 const string output_dir = "/home/jaa/.wine/drive_c/data/";
 
@@ -32,7 +32,7 @@ void testNNCorrectness(float * bounds);
 void testSlidingMidPoint();
 
 /** Compares optimized and simeple NN in kd-tree*/
-void compareNNandSimple(float * bounds);
+void compareNNandSimple();
 
 /** Does circular query on data and prints data to output folder */
 void printCircularQuery(float * bounds);
@@ -58,18 +58,20 @@ int main(int argc, char *argv[]) {
     float bounds[2*5] = {0.f, 10.f, 0.f, 12.f, 0.f, 10.f, 1.f, 3.f, 3.f, 9.f};
 
     
+    compareNNandSimple();
+    
+    
     //runNN(bounds);
     //runCircular(bounds);
     //runKNN(bounds);
     
     //printKNearest(bounds);
-    printBuckets(bounds);
+    //printBuckets(bounds);
     //printCircularQuery(bounds);
     
     //testNNCorrectness(bounds);
     //testSlidingMidPoint();
     
-    //compareNNandSimple(bounds);
     
 	    
     return 0;
@@ -153,40 +155,54 @@ void printBuckets(float * bounds) {
 
 }
 
-void compareNNandSimple(float * bounds) {
+void compareNNandSimple() {
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generateRandomPoints(20000, &bounds[0]);
+    vector< Point<D> > points = pcg.generateRandomPoints(10000000);
     
     KDTree<D> kdtree;
-    kdtree.construct(&points, &bounds[0]);
+    kdtree.construct(&points);
     
-    long start = clock();
-    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
-	Point<D> q = *it;
-	kdtree.nearestNeighbor(&q);
+    struct timeval start, end;
+    long seconds, useconds;  
+    long time1, time2, time3;
+    
+    gettimeofday(&start, NULL);
+    for(vector< Point<D> >::iterator it = points.begin(); it != points.begin() + 10000; ++it) {
+	Point<D> *p = kdtree.nearestNeighbor(&(*it));
+	p->setColor(255,0,0);
     }
-    float time = (clock() - start) / (float) CLOCKS_PER_SEC;
-    cout << "  nearestNeighbor time: " << time << "s\n";
+    gettimeofday(&end, NULL);
     
-    start = clock();
-    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
-	Point<D> q = *it;
-	kdtree.simpleNearestNeighbor(&q);
-    }
-    float time2 = (clock() - start) / (float) CLOCKS_PER_SEC;
-    cout << "  simpleNearestNeighbor time: " << time2 << "s\n";
+    seconds  = end.tv_sec  - start.tv_sec;
+    useconds = end.tv_usec - start.tv_usec;
+    time1 = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+    cout << "  nearestNeighbor time: " << time1 << "ms\n";
     
-    start = clock();
-    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
-	Point<D> q = *it;
-	naiveNN(&q, &points);
-    }
-    float time3 = (clock() - start) / (float) CLOCKS_PER_SEC;
-    cout << "  naiveNN time: " << time3 << "s\n";
+//    gettimeofday(&start, NULL);
+//    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+//	Point<D> *p = kdtree.simpleNearestNeighbor(&(*it));
+//	p->setColor(255,0,0);
+//    }
+//    gettimeofday(&end, NULL);
+//    seconds  = end.tv_sec  - start.tv_sec;
+//    useconds = end.tv_usec - start.tv_usec;
+//    time2 = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+//    cout << "  simpleNearestNeighbor time: " << time2 << "ms\n";
     
-    cout << "> nearestNeighbor method is " << (time2/time) << "x faster than simple and "
-	    << (time3/time) << "x faster than naive.\n";
+//    gettimeofday(&start, NULL);
+//    for(vector< Point<D> >::iterator it = points.begin(); it != points.end(); ++it) {
+//	Point<D> *p = naiveNN(&(*it), &points);
+//	p->setColor(255,0,0); //the compiler (or whatever) discards this cycle if I dont use the point
+//    }
+//    gettimeofday(&end, NULL);
+//    seconds  = end.tv_sec  - start.tv_sec;
+//    useconds = end.tv_usec - start.tv_usec;
+//    time3 = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+//    cout << "  naiveNN time: " << time3 << "ms\n";
+//    
+//    cout << "> nearestNeighbor method is " << (time2/ (double) time1) << "x faster than simple and "
+//	    << (time3/ (double) time1) << "x faster than naive.\n";
 
 }
 
@@ -235,7 +251,7 @@ void printKNearest(float * bounds) {
 void testNNCorrectness(float * bounds) {
     
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generateRandomPoints(5000, &bounds[0]);;
+    vector< Point<D> > points = pcg.generateRandomPoints(10000, &bounds[0]);;
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
