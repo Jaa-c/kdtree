@@ -40,83 +40,113 @@ class KDTree {
     /** bounding box of the tree, format: xmin, xmax, ymin, ymax, ...*/
     float boundingBox[2*D];
     
+    struct Constr {
+	points data;
+	float bounds[2*D];
+	Inner *parent;
+	
+	Constr(points data, float * bounds, Inner *parent) 
+		: data(data), parent(parent) {
+	    
+	    std::copy(bounds, bounds + 2*D, &this->bounds[0]);
+	}
+    };
+    
+    
     /**
      * Recursive construction of the tree
      * @param data Set on unordered points
      * @param bounds current bounds in the tree
      * @param parent parent node
      */
-    void construct(points * data, float * bounds, Inner* parent)  {
+    void construct(points * adata, float * abounds, Inner* aparent)  {
 	
-	int dim = -1; //dimension to split
-	float size = 0;
-	for(int i = 0; i < D; i++) {
-	    if(bounds[2*i + 1] - bounds[2*i] > size) {
-		size = bounds[2*i + 1] - bounds[2*i];
-		dim = i;
+	stack<Constr> stack;
+	stack.push(Constr(*adata, abounds, aparent));
+	
+	while(!stack.empty()) {
+	    	    
+	    Constr curr = stack.top();
+	    stack.pop();
+	    points * data = &curr.data;
+	    float* bounds = &curr.bounds[0];
+	    Inner *parent = curr.parent;
+	
+	    int dim = -1; //dimension to split
+	    float size = 0;
+	    for(int i = 0; i < D; i++) {
+		if(bounds[2*i + 1] - bounds[2*i] > size) {
+		    size = bounds[2*i + 1] - bounds[2*i];
+		    dim = i;
+		}
 	    }
+	    float split = bounds[2*dim] + size / 2.0f; //split value
+
+	    points left, right; //TODO: is this local?
+	    float lmax = 0, rmin = numeric_limits<float>::max();
+
+	    for(points_it it = data->begin(); it != data->end(); ++it) {
+		Point<D> *p = (*it);
+		if((*p)[dim] <= split) { //NOTE: points exactly on split line belong to left node!
+		    left.push_back(*it);
+		    if((*p)[dim] > lmax)
+			lmax = (*p)[dim];
+		}
+		if((*p)[dim] > split) {
+		    right.push_back(*it);
+		    if((*p)[dim] < rmin)
+			rmin = (*p)[dim];
+		}
+	    }
+	    //sliding midpoint split
+	    if(right.size() == 0)
+		split = lmax;
+	    if(left.size() == 0)
+		split = rmin;
+
+	    //set split to node
+	    parent->dimension = dim;
+	    parent->split = split;
+
+	    //create nodes
+	    if(left.size() > 0) {
+		if(left.size() > bucketSize) {
+		    Inner *node = new Inner(parent);
+		    parent->left = node;
+
+		    float b[2*D];
+		    std::copy(bounds, bounds + 2*D, &b[0]);
+		    b[2*dim + 1] = split;
+		    //construct(&left, &b[0], node);
+		    stack.push(Constr(left, &b[0], node));
+
+		}
+		else {
+		    Leaf<D> * leaf = new Leaf<D>(parent, left);
+		    parent->left = leaf;
+		}
+
+	    }
+
+	    if(right.size() > 0) {
+		if(right.size() > bucketSize) {
+		    Inner *node = new Inner(parent);
+		    parent->right = node;
+
+		    float b[2*D];
+		    std::copy(bounds, bounds + 2*D, &b[0]);
+		    b[2*dim] = split;
+		    //construct(&right, &b[0], node);
+		    stack.push(Constr(right, &b[0], node));
+		}
+		else {
+		    Leaf<D> * leaf = new Leaf<D>(parent, right);
+		    parent->right = leaf;
+		}
+	    }
+	
 	}
-	float split = bounds[2*dim] + size / 2.0f; //split value
-		
-	points left, right; //TODO: is this local?
-	float lmax = 0, rmin = split * bounds[2*dim + 1];
 	
-	for(points_it it = data->begin(); it != data->end(); ++it) {
-	    Point<D> p = *(*it);
-	    if(p[dim] <= split) { //NOTE: points exactly on split line belong to left node!
-		left.push_back(*it);
-		if(p[dim] > lmax)
-		    lmax = p[dim];
-	    }
-	    if(p[dim] > split) {
-		right.push_back(*it);
-		if(p[dim] < rmin)
-		    rmin = p[dim];
-	    }
-	}
-	//sliding midpoint split
-	if(right.size() == 0)
-	    split = lmax;
-	if(left.size() == 0)
-	    split = rmin;
-	
-	//set split to node
-	parent->dimension = dim;
-	parent->split = split;
-	
-	//create nodes
-	if(left.size() > 0) {
-	    if(left.size() > bucketSize) {
-		Inner *node = new Inner(parent);
-		parent->left = node;
-		
-		float b[2*D];
-		std::copy(bounds, bounds + 2*D, &b[0]);
-		b[2*dim + 1] = split;
-		construct(&left, &b[0], node);
-	    }
-	    else {
-		Leaf<D> * leaf = new Leaf<D>(parent, left);
-		parent->left = leaf;
-	    }
-	}
-	
-	if(right.size() > 0) {
-	    if(right.size() > bucketSize) {
-		Inner *node = new Inner(parent);
-		parent->right = node;
-		
-		float b[2*D];
-		std::copy(bounds, bounds + 2*D, &b[0]);
-		b[2*dim] = split;
-		construct(&right, &b[0], node);
-	    }
-	    else {
-		Leaf<D> * leaf = new Leaf<D>(parent, right);
-		parent->right = leaf;
-	    }
-	}
-    
     }
     
     /**

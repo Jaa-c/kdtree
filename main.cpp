@@ -28,6 +28,9 @@ Point<D> * naiveNN(Point<D> * query, vector< Point<D> > *data);
 /** Tests if kd-tree nearest neigbor returns the smae as naive NN */
 void testNNCorrectness(float * bounds);
 
+/** test if sliding midpoint works ok */
+void testSlidingMidPoint();
+
 /** Compares optimized and simeple NN in kd-tree*/
 void compareNNandSimple(float * bounds);
 
@@ -51,40 +54,23 @@ void runNN(float * bounds);
 
 
 int main(int argc, char *argv[]) {
-    const rlim_t kStackSize = 32 * 1024 * 1024;   // min stack size = 16 MB
-    struct rlimit rl;
-    int result;
-
-    result = getrlimit(RLIMIT_STACK, &rl);
-    if (result == 0)
-    {
-       if (rl.rlim_cur < kStackSize)
-       {
-	   rl.rlim_cur = kStackSize;
-	   result = setrlimit(RLIMIT_STACK, &rl);
-	   if (result != 0)
-	   {
-	       fprintf(stderr, "setrlimit returned result = %d\n", result);
-	   }
-       }
-    }
-    
+        
     float bounds[2*5] = {0.f, 10.f, 0.f, 12.f, 0.f, 10.f, 1.f, 3.f, 3.f, 9.f};
 
     
-    runNN(bounds);
+    //runNN(bounds);
     //runCircular(bounds);
     //runKNN(bounds);
     
     //printKNearest(bounds);
+    printBuckets(bounds);
+    //printCircularQuery(bounds);
     
-    //printBuckets(bounds);
-    
-    //testCircularQuery(bounds);
+    //testNNCorrectness(bounds);
+    //testSlidingMidPoint();
     
     //compareNNandSimple(bounds);
     
-    //testNNCorrectness(bounds);
 	    
     return 0;
     
@@ -94,6 +80,20 @@ int main(int argc, char *argv[]) {
     
 //    vector< Point<D> > points = PlyHandler::load<D>("data/input.ply");
     
+}
+
+void testSlidingMidPoint() {
+    float bounds[2*2] = {0.f, 10.f, 0.f, 12.f};
+    float bounds1[2*2] = {0.f, 1.f, 0.f, 1.2f};
+    
+    PointCloudGenerator<D> pcg;
+    vector< Point<D> > points = pcg.generateRandomPoints(40, &bounds1[0]);
+    
+    
+    KDTree<D> kdtree;
+    kdtree.construct(&points, &bounds[0]);
+    
+    KDTree2Ply<D>::saveTree2Ply(&kdtree, bounds, output_dir + "tree-", true);
 }
 
 void runCircular(float * bounds) {
@@ -129,7 +129,7 @@ void runKNN(float * bounds) {
 
 void runNN(float * bounds) {
     PointCloudGenerator<D> pcg;
-    vector< Point<D> > points = pcg.generateRandomPoints(1000000, &bounds[0]);
+    vector< Point<D> > points = pcg.generateRandomPoints(100, &bounds[0]);
     
     KDTree<D> kdtree;
     kdtree.construct(&points, &bounds[0]);
