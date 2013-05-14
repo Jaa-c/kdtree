@@ -184,7 +184,7 @@ enum Visited {
 };
 
 /**
- * Structure in the stack for NN search
+ * Structure on the stack for NN search
  */
 template<const int D = 3>
 struct ExtendedNode {
@@ -194,6 +194,22 @@ struct ExtendedNode {
     
     ExtendedNode() : node(NULL) {}
     ExtendedNode(Inner * node) : node(node) {}
+};
+
+/**
+ * Structure on the stack tree construction
+ */
+template<const int D = 3>
+struct Constr {
+    std::vector< Point<D> *> data;
+    float bounds[2*D];
+    Inner *parent;
+
+    Constr(std::vector< Point<D> *> data, float * bounds, Inner *parent) 
+	    : data(data), parent(parent) {
+
+	std::copy(bounds, bounds + 2*D, &this->bounds[0]);
+    }
 };
 
 #endif	/* KDTREENODES_H */

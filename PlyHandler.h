@@ -101,9 +101,9 @@ public:
 	    if (!(iss >> x >> x >> x)) {
 		break;
 	    }
-//	    if (!(iss >> p.color[0] >> p.color[1] >> p.color[2])) {
-//		break;
-//	    }
+	    if (!(iss >> p.color[0] >> p.color[1] >> p.color[2])) {
+		break;
+	    }
 	    data.push_back(p);
 	}
 	infile.close();

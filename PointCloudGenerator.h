@@ -15,24 +15,19 @@
 
 
 template <const int D = 3>
-class PointCloudGenerator {
+class PointCloudGen {
        
     static constexpr float pi = 3.1415926f;
     
-    float randomFloat(float a, float b) {
+    static float randomFloat(float a, float b) {
 	float random = ((float) rand()) / (float) RAND_MAX;
 	return a + random * (b - a);
     }
     
 public:
-    
-    PointCloudGenerator() {
-	 srand((unsigned)std::time(0)); 
-    }
-    
-    ~PointCloudGenerator() {}
-    
-    std::vector< Point<D> > generateRandomPoints(int count, float *bounds) {
+        
+    static std::vector< Point<D> > genRandPoints(int count, float *bounds) {
+	srand((unsigned)std::time(0)); 
 	std::vector< Point<D> > points;
 	for(int i = 0; i < count; i++) {
 	    Point<D> p;
@@ -46,7 +41,8 @@ public:
 	return points;
     }
     
-    std::vector< Point<D> > generateRandomPoints(int count) {
+    static std::vector< Point<D> > genRandPoints(int count) {
+	srand((unsigned)std::time(0)); 
 	std::vector< Point<D> > points;
 	for(int i = 0; i < count; i++) {
 	    Point<D> p;
@@ -60,7 +56,8 @@ public:
 	return points;
     }
     
-    std::vector< Point<D> > generateNormalPoints(int count) {
+    static std::vector< Point<D> > genGaussDistr(int count) {
+	srand((unsigned)std::time(0)); 
 //	const int mu = 0; //the mean
 //	const int sigma = 1; //enter the standard deviation you want or need
 	std::vector< Point<D> > points;

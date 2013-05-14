@@ -29,7 +29,7 @@ class KDTree {
     typedef pair<Inner *, Visited> exInner; //DEPRECATED
     
     /** Size of the bucket*/
-    const static int bucketSize = 8;
+    const static int bucketSize = 10;
     
     /** root of the tree */
     Inner * root;
@@ -40,18 +40,8 @@ class KDTree {
     /** bounding box of the tree, format: xmin, xmax, ymin, ymax, ...*/
     float boundingBox[2*D];
     
-    struct Constr {
-	points data;
-	float bounds[2*D];
-	Inner *parent;
-	
-	Constr(points data, float * bounds, Inner *parent) 
-		: data(data), parent(parent) {
-	    
-	    std::copy(bounds, bounds + 2*D, &this->bounds[0]);
-	}
-    };
-    
+    /** number of visited nodes during NN searches*/
+    int visitedNodes;  
     
     /**
      * Recursive construction of the tree
@@ -61,12 +51,12 @@ class KDTree {
      */
     void construct(points * adata, float * abounds, Inner* aparent)  {
 	
-	stack<Constr> stack;
-	stack.push(Constr(*adata, abounds, aparent));
+	stack<Constr<D>> stack;
+	stack.push(Constr<D>(*adata, abounds, aparent));
 	
 	while(!stack.empty()) {
 	    	    
-	    Constr curr = stack.top();
+	    Constr<D> curr = stack.top();
 	    stack.pop();
 	    points * data = &curr.data;
 	    float* bounds = &curr.bounds[0];
@@ -120,7 +110,7 @@ class KDTree {
 		    std::copy(bounds, bounds + 2*D, &b[0]);
 		    b[2*dim + 1] = split;
 		    //construct(&left, &b[0], node);
-		    stack.push(Constr(left, &b[0], node));
+		    stack.push(Constr<D>(left, &b[0], node));
 
 		}
 		else {
@@ -139,7 +129,7 @@ class KDTree {
 		    std::copy(bounds, bounds + 2*D, &b[0]);
 		    b[2*dim] = split;
 		    //construct(&right, &b[0], node);
-		    stack.push(Constr(right, &b[0], node));
+		    stack.push(Constr<D>(right, &b[0], node));
 		}
 		else {
 		    Leaf<D> * leaf = new Leaf<D>(parent, right);
@@ -307,6 +297,14 @@ public:
     }
     
     /**
+     * Returns the number of visited nodes during last search
+     * @return number of visited nodes
+     */
+    const int getVisitedNodes() const {
+	return visitedNodes;
+    }
+    
+    /**
      * Bounding box of the tree
      * @return array of size 2D, format: xmin, xmax, ymin, ymax, ...
      */
@@ -321,49 +319,34 @@ public:
      * @param k the number of points we look for
      * @return vector op kNN
      */
-    vector< Point<D> * > kNearestNeighbor(const Point<D> *query, const int k) {
-	Leaf<D> *leaf = findBucket(query);
-	
-	float dist = 0;
-	for(int d = 0; d < D; d++) {
-	    float tmp = leaf->max[d] - leaf->min[d];
-	    dist += tmp * tmp;
-	}
-	
-	if(dist == 0) { //bucket has only 1 point, so lets just find NN
-	    dist = distance(leaf->bucket[0], nearestNeighbor(query));
-	}
-	
-	float r = sqrt(dist) / 2.0f;
-	
-	int diff = k - leaf->bucket.size();
-	if(diff > 0) {
-	    float df = pow(diff, 1 / (float) D);
-	    r *= df; // works pretty well
-	}
+    vector< Point<D> * > kNearestNeighbors(const Point<D> *query, const int k) {
+	visitedNodes = 0;
+	Point<D> *n = nearestNeighbor(query);
+	float r = distance(n, query, true) * (1 + 2 / (float)D);
 	
 	vector< Point<D> * > knn;
 	
 	//TODO: this is certainly not the most efficient solution
+	//however all "clever" solutions I tried failed in hight dimension or on
+	//various data. So I'll leave this, usually returns result <5 iterations.
 	for(int i = 100; i > 1; i--) { 
-	     knn = circularQuery(query, r);
+	    knn = circularQuery(query, r);
 	    if(knn.size() > k + 1 || knn.size() == size) {
 		break;
 	    }
 	    else {
-		r *= 1 + (1 / (float) D) + (1 / (float) i);
+		r *= 1 + (1 / (float) D);
 	    }
 	}
 	
+	//C++11, I guess it's OK to use it
 	sort(knn.begin(), knn.end(), 
 	    [query, this](const Point<D> * a, const Point<D> * b) -> bool { 
 		return distance(a, query) < distance(b, query); 
 	    });
 	    
 	vector< Point<D> * > result;
-	
 	int size =  (k + 1 < knn.size()) ? k + 1 : knn.size();
-	
 	result.insert(result.end(), knn.begin() + 1, knn.begin() + size);
 	
 	return result;
@@ -378,14 +361,16 @@ public:
      * @param radius radius of the sphere
      * @return list of points inside
      */
-    vector< Point<D> * > circularQuery(const Point<D> *query, const int radius) {
+    vector< Point<D> * > circularQuery(const Point<D> *query, const float radius) {
+	//visitedNodes = 0;
 	Leaf<D> *leaf = findBucket(query);
 	vector< Point<D> * > data;
 	float r = radius * radius;
 	
 	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
-	    float tmp = distance(query, *it);
+	    visitedNodes++;
+	    float tmp = distance(query, *it, false);
 	    if(tmp < r) { //ie points are not the same!
 		data.push_back(*it);
 	    }
@@ -469,9 +454,10 @@ public:
 			Leaf<D> * leaf = (Leaf<D> *) node;
 			///BOB test
 			if(minBoundsDistance(query, leaf->min, leaf->max) < r) {
+			    visitedNodes++;
 			    points *bucket = &leaf->bucket;
 			    for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
-				float tmp = distance(query, *it);
+				float tmp = distance(query, *it, false);
 				if(tmp < r) { //ie points are not the same!
 				    data.push_back(*it);
 				}
@@ -503,6 +489,7 @@ public:
      * @return nearest neigbor
      */
     Point<D> * nearestNeighbor(const Point<D> *query) {
+	visitedNodes = 0;
 	Leaf<D> *leaf = findBucket(query);
 	/** squared distance of the current nearest neigbor */
 	float dist = numeric_limits<float>::max();
@@ -511,6 +498,7 @@ public:
 	
 	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
+	    visitedNodes++;
 	    (*it)->setColor(0, 255, 0);
 	    float tmp = distance(query, *it);
 	    if(tmp < dist && tmp > 0) { //ie points are not the same!
@@ -599,6 +587,7 @@ public:
 			if(minBoundsDistance(query, leaf->min, leaf->max) < dist) {
 			    points *bucket = &leaf->bucket;
 			    for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
+				visitedNodes++;
 				(*it)->setColor(255, 255, 0); //debug
 				float tmp = distance(query, *it);
 				if(tmp < dist && tmp > 0) { //ie points are not the same!
@@ -710,6 +699,7 @@ public:
      * @return nearest neigbor
      */
     Point<D> * simpleNearestNeighbor(const Point<D> *query) {
+	visitedNodes = 0;
 	Leaf<D> *leaf = findBucket(query);
 	float dist = numeric_limits<float>::max();
 	Point<D> * nearest;
@@ -770,6 +760,7 @@ public:
 			points *bucket = &((Leaf<D> *)(nodes[i]))->bucket;
 			for(points_it it = bucket->begin(); it != bucket->end(); ++it) {
 			    //(*it)->setColor(255, 255, 0);
+			    visitedNodes++;
 			    float tmp = distance(query, *it, true);
 			    if(tmp < dist && tmp > 0) { //ie points are not the same!
 				dist = tmp;
