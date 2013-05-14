@@ -1,8 +1,9 @@
 /* 
  * File:   KDTreeNodes.h
- * Author: jaa
+ * Author: Dan Princ
+ * 
+ * Contains various structures used in the KDTree
  *
- * Created on 10. květen 2013, 2:14
  */
 
 #ifndef KDTREENODES_H
@@ -93,8 +94,8 @@ struct Leaf : Node {
     void add(Point<D> * p) {
 	bucket.push_back(p);
 	for(int d = 0; d < D; d++) {
-	    if(p[d] > max[d]) max[d] = p[d];
-	    if(p[d] < min[d]) min[d] = p[d];
+	    if((*p)[d] > max[d]) max[d] = (*p)[d];
+	    if((*p)[d] < min[d]) min[d] = (*p)[d];
 	}
     }
     
@@ -108,6 +109,10 @@ struct Leaf : Node {
 
 };
 
+/**
+ * Object that keeps track of the distance coverd
+ * from NN query.
+ */
 template<const int D = 3>
 struct TrackingNode {
 private:
@@ -115,7 +120,9 @@ private:
     float length;
     
 public:
-        
+    /**
+     * Constructior
+     */
     TrackingNode() {
 	for(int d = 0; d < D; d++) {
 	    tracker[d] = 0;
@@ -153,23 +160,24 @@ public:
 	temp += val * val;
 	return temp;
     }
-    
-    
-    void remove(int d, float val) {
-	tracker[d] -= val*val;
-	length -= val*val;
-    }
-    
+  
+    /**
+     * Returns the length from the query
+     * @return length
+     */
     float getLength() const {
 	return sqrt(length);
     }
     
+    /**
+     * Returns the sqared length from the query
+     * @return length square
+     */
     float getLengthSquare() const {
 	return length;
     }
 
 };
-
 
 /** Status of nodes during NN search */
 enum Visited {

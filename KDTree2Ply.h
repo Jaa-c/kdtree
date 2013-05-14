@@ -16,6 +16,9 @@
 
 using namespace std;
 
+/**
+ * Exports given tree to PLY files
+ */
 template<const int D = 2>
 class KDTree2Ply {
     
@@ -68,6 +71,12 @@ public:
     }
     
 private:
+    /**
+     * Returns all points from the tree
+     * @param node node to search
+     * @param paint if true, every bucket is given random color
+     * @return 
+     */
     static vector< Point<D> > debugBuckets(const Inner* node, bool paint) {
 	vector< Point<D> > data;
 	if(node->left) {
@@ -116,6 +125,12 @@ private:
 	return data;
     }
     
+    /**
+     * Saves splitting lines
+     * @param node
+     * @param bound
+     * @return 
+     */
     static vector< Point<D> > debugTree(const Inner* node, const float* bound) {
 	vector< Point<D> > data;
 	if(D != 2) return data;

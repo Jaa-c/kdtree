@@ -47,7 +47,7 @@ void printCircularQuery(float * bounds);
 void printKNearest(float * bounds);
 
 /** prints tree (colored buckets) + splitting lines */
-void printBuckets(float * bounds);
+void printBuckets();
 
 /** runs a lot of circular queries for profiling */
 void runCircular(float * bounds);
@@ -75,8 +75,8 @@ int main(int argc, char *argv[]) {
     //compareNNonDatasets();
     
     printKNearest(bounds);
-    //printBuckets(bounds);
     //printCircularQuery(bounds);
+    //printBuckets();
     //printKnnOnRealData();
     
     //testNNCorrectness(bounds);
@@ -279,7 +279,7 @@ void runNN(float * bounds) {
     }
 }
 
-void printBuckets(float * bounds) {
+void printBuckets() {
     
     //vector< Point<D> > points = PointCloudGen<D>::generateRandomPoints(100, &bounds[0]);
     vector< Point<D> > points = PointCloudGen<D>::genGaussDistr(150);

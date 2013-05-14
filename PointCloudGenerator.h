@@ -13,7 +13,9 @@
 #include "Point.h"
 
 
-
+/**
+ * Generates point data
+ */
 template <const int D = 3>
 class PointCloudGen {
        
@@ -25,7 +27,13 @@ class PointCloudGen {
     }
     
 public:
-        
+    
+    /**
+     * Gfenerates set of random points within given bounds
+     * @param count number of points
+     * @param bounds array with bounds
+     * @return 
+     */
     static std::vector< Point<D> > genRandPoints(int count, float *bounds) {
 	srand((unsigned)std::time(0)); 
 	std::vector< Point<D> > points;
@@ -41,25 +49,31 @@ public:
 	return points;
     }
     
+    /**
+     * Gfenerates set of random points in interval <0, 1>) 
+     * @param count number of points
+     * @return 
+     */
     static std::vector< Point<D> > genRandPoints(int count) {
 	srand((unsigned)std::time(0)); 
 	std::vector< Point<D> > points;
 	for(int i = 0; i < count; i++) {
 	    Point<D> p;
 	    for(int d = 0; d < D; d++) {
-		int min = 0;
-		int max = 1;
-		p[d] = randomFloat(min, max);
+		p[d] = randomFloat(0, 1);
 	    }
 	    points.push_back(p);
 	}
 	return points;
     }
     
+    /**
+     * Generates set of random points with normal distribution
+     * @param count number of points, always returns even number of points
+     * @return 
+     */
     static std::vector< Point<D> > genGaussDistr(int count) {
 	srand((unsigned)std::time(0)); 
-//	const int mu = 0; //the mean
-//	const int sigma = 1; //enter the standard deviation you want or need
 	std::vector< Point<D> > points;
 	
 	for(int i = 0; i < count; i+=2) {
@@ -69,14 +83,8 @@ public:
 		float u1 = ((float) rand()) / (float) RAND_MAX;
 		float u2 = ((float) rand()) / (float) RAND_MAX;
 
-		float z1 = sqrt(-2 * log(u1)) * sin(2 * pi * u2);
-		float z2 = sqrt(-2 * log(u1)) * cos(2 * pi * u2);
-		
-		//float x1 = mu + z1 * sigma;
-		//float x2 = mu + z2 * sigma;
-		
-		p1[d] = z1;
-		p2[d] = z2;
+		p1[d] = sqrt(-2 * log(u1)) * sin(2 * pi * u2);
+		p2[d] z2 = sqrt(-2 * log(u1)) * cos(2 * pi * u2);
 	    }
 	    points.push_back(p1);
 	    points.push_back(p2);
@@ -85,8 +93,6 @@ public:
 	return points;
     }
     
-
 };
-
 
 #endif	/* POINTCLOUDGENERATOR_H */

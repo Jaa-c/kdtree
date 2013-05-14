@@ -23,7 +23,9 @@
 
 using namespace std;
 
-
+/**
+ * Basic work with ply files for point data
+ */
 class PlyHandler {
     
     // trim from start
@@ -44,6 +46,12 @@ class PlyHandler {
     }
 
 public:
+    /**
+     * Loads set of point from ply file
+     * Note that this is not very general and handles files with points
+     * @param file path to file
+     * @return vector of points
+     */
     template<const int D>
     static vector< Point<D> > load(string file) {
 	vector< Point<D> > data;
@@ -101,9 +109,8 @@ public:
 	    if (!(iss >> x >> x >> x)) {
 		break;
 	    }
-	    if (!(iss >> p.color[0] >> p.color[1] >> p.color[2])) {
-		break;
-	    }
+	    iss >> p.color[0] >> p.color[1] >> p.color[2];
+	    
 	    data.push_back(p);
 	}
 	infile.close();
@@ -113,6 +120,11 @@ public:
 	return data;
     }
     
+    /**
+     * Saves points to PLY file
+     * @param file file name
+     * @param data points
+     */
     template<const int D>
     static void savePoints(string file, vector< Point<D> > data) {
 	if(D > 3 || D < 2) 
@@ -148,6 +160,11 @@ public:
 	myfile.close();
     }
     
+    /**
+     * Saves lines from given coordinates
+     * @param file file name
+     * @param data set points defining lines
+     */
     template<const int D>
     static void saveLines(string file, vector< Point<D> > data) {
 	if(D > 3 || D < 2) 
@@ -193,6 +210,9 @@ public:
 	myfile.close();
     }
     
+    /**
+     * Debug
+     */
     template<const int D>
     static void saveWindow(float* window) {
 	if(D != 2) return;
@@ -223,7 +243,4 @@ public:
 
 };
 
-
-
 #endif	/* PLYHANDLER_H */
-
