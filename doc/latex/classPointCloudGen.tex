@@ -1,0 +1,77 @@
+\hypertarget{classPointCloudGen}{\section{Point\-Cloud\-Gen$<$ D $>$ Class Template Reference}
+\label{classPointCloudGen}\index{Point\-Cloud\-Gen$<$ D $>$@{Point\-Cloud\-Gen$<$ D $>$}}
+}
+
+
+{\ttfamily \#include $<$Point\-Cloud\-Generator.\-h$>$}
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static std\-::vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $>$ \hyperlink{classPointCloudGen_a824a0daf811c25a219243c782b26eb74}{gen\-Rand\-Points} (int count, float $\ast$bounds)
+\item 
+static std\-::vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $>$ \hyperlink{classPointCloudGen_a1d9b194ddbab0f7c1a60b0fef5eee8e5}{gen\-Rand\-Points} (int count)
+\item 
+static std\-::vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $>$ \hyperlink{classPointCloudGen_a50a0d0e05abe67b2fe66ddf325ceb71e}{gen\-Gauss\-Distr} (int count)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$const int D = 3$>$class Point\-Cloud\-Gen$<$ D $>$}
+
+Generates point data 
+
+\subsection{Member Function Documentation}
+\hypertarget{classPointCloudGen_a50a0d0e05abe67b2fe66ddf325ceb71e}{\index{Point\-Cloud\-Gen@{Point\-Cloud\-Gen}!gen\-Gauss\-Distr@{gen\-Gauss\-Distr}}
+\index{gen\-Gauss\-Distr@{gen\-Gauss\-Distr}!PointCloudGen@{Point\-Cloud\-Gen}}
+\subsubsection[{gen\-Gauss\-Distr}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ static std\-::vector$<$ {\bf Point}$<$D$>$ $>$ {\bf Point\-Cloud\-Gen}$<$ D $>$\-::gen\-Gauss\-Distr (
+\begin{DoxyParamCaption}
+\item[{int}]{count}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classPointCloudGen_a50a0d0e05abe67b2fe66ddf325ceb71e}
+Generates set of random points with normal distribution 
+\begin{DoxyParams}{Parameters}
+{\em count} & number of points, always returns even number of points \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\hypertarget{classPointCloudGen_a824a0daf811c25a219243c782b26eb74}{\index{Point\-Cloud\-Gen@{Point\-Cloud\-Gen}!gen\-Rand\-Points@{gen\-Rand\-Points}}
+\index{gen\-Rand\-Points@{gen\-Rand\-Points}!PointCloudGen@{Point\-Cloud\-Gen}}
+\subsubsection[{gen\-Rand\-Points}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ static std\-::vector$<$ {\bf Point}$<$D$>$ $>$ {\bf Point\-Cloud\-Gen}$<$ D $>$\-::gen\-Rand\-Points (
+\begin{DoxyParamCaption}
+\item[{int}]{count, }
+\item[{float $\ast$}]{bounds}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classPointCloudGen_a824a0daf811c25a219243c782b26eb74}
+Gfenerates set of random points within given bounds 
+\begin{DoxyParams}{Parameters}
+{\em count} & number of points \\
+\hline
+{\em bounds} & array with bounds \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\hypertarget{classPointCloudGen_a1d9b194ddbab0f7c1a60b0fef5eee8e5}{\index{Point\-Cloud\-Gen@{Point\-Cloud\-Gen}!gen\-Rand\-Points@{gen\-Rand\-Points}}
+\index{gen\-Rand\-Points@{gen\-Rand\-Points}!PointCloudGen@{Point\-Cloud\-Gen}}
+\subsubsection[{gen\-Rand\-Points}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ static std\-::vector$<$ {\bf Point}$<$D$>$ $>$ {\bf Point\-Cloud\-Gen}$<$ D $>$\-::gen\-Rand\-Points (
+\begin{DoxyParamCaption}
+\item[{int}]{count}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classPointCloudGen_a1d9b194ddbab0f7c1a60b0fef5eee8e5}
+Gfenerates set of random points in interval $<$0, 1$>$) 
+\begin{DoxyParams}{Parameters}
+{\em count} & number of points \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Point\-Cloud\-Generator.\-h\end{DoxyCompactItemize}

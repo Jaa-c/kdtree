@@ -1,0 +1,63 @@
+\hypertarget{structNode}{\section{Node Struct Reference}
+\label{structNode}\index{Node@{Node}}
+}
+
+
+{\ttfamily \#include $<$K\-D\-Tree\-Nodes.\-h$>$}
+
+Inheritance diagram for Node\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{structNode}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+const bool \hyperlink{structNode_a1d4f6e4b2b8ff2c149210cfaf95b817d}{is\-Leaf} () const 
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structInner}{Inner} $\ast$ \hyperlink{structNode_a44c2ed507b369efa2c74549d9b862c9b}{parent}
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structNode_a056107855260daf5f707c14fd85eb7b7}{Node} (const bool leaf, \hyperlink{structInner}{Inner} $\ast$\hyperlink{structNode_a44c2ed507b369efa2c74549d9b862c9b}{parent})
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Parent of nodes, can't be instantiated 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{structNode_a056107855260daf5f707c14fd85eb7b7}{\index{Node@{Node}!Node@{Node}}
+\index{Node@{Node}!Node@{Node}}
+\subsubsection[{Node}]{\setlength{\rightskip}{0pt plus 5cm}Node\-::\-Node (
+\begin{DoxyParamCaption}
+\item[{const bool}]{leaf, }
+\item[{{\bf Inner} $\ast$}]{parent}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}}\label{structNode_a056107855260daf5f707c14fd85eb7b7}
+Constructor for child classes 
+
+\subsection{Member Function Documentation}
+\hypertarget{structNode_a1d4f6e4b2b8ff2c149210cfaf95b817d}{\index{Node@{Node}!is\-Leaf@{is\-Leaf}}
+\index{is\-Leaf@{is\-Leaf}!Node@{Node}}
+\subsubsection[{is\-Leaf}]{\setlength{\rightskip}{0pt plus 5cm}const bool Node\-::is\-Leaf (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{structNode_a1d4f6e4b2b8ff2c149210cfaf95b817d}
+Returns true if node is leaf 
+
+\subsection{Member Data Documentation}
+\hypertarget{structNode_a44c2ed507b369efa2c74549d9b862c9b}{\index{Node@{Node}!parent@{parent}}
+\index{parent@{parent}!Node@{Node}}
+\subsubsection[{parent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Inner}$\ast$ Node\-::parent}}\label{structNode_a44c2ed507b369efa2c74549d9b862c9b}
+Pointer to parent node 
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+K\-D\-Tree\-Nodes.\-h\end{DoxyCompactItemize}

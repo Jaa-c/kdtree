@@ -1,0 +1,238 @@
+\hypertarget{classKDTree}{\section{K\-D\-Tree$<$ D $>$ Class Template Reference}
+\label{classKDTree}\index{K\-D\-Tree$<$ D $>$@{K\-D\-Tree$<$ D $>$}}
+}
+
+
+{\ttfamily \#include $<$K\-D\-Tree.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classKDTree_af8220208eafa9aaacd41164507870fba}{K\-D\-Tree} ()
+\item 
+\hyperlink{classKDTree_aa4bae329f2bdbb5ed8ce89070c43078c}{$\sim$\-K\-D\-Tree} ()
+\item 
+const \hyperlink{structInner}{Inner} $\ast$ \hyperlink{classKDTree_ad1ffc917a93f765773dbf3747ae9c7d0}{get\-Root} () const 
+\item 
+const int \hyperlink{classKDTree_a8e2b12172d5b99ddcbd4d20cbf81d321}{get\-Visited\-Nodes} () const 
+\item 
+const float $\ast$ \hyperlink{classKDTree_aab6b366c8f0ec6e2a1a9aa1854ee8439}{get\-Bounding\-Box} () const 
+\item 
+const int \hyperlink{classKDTree_accfe9020b6c62da899799e704e7b336a}{size} () const 
+\item 
+void \hyperlink{classKDTree_af3a771134ab1e1c1cf86f8c408c19371}{construct} (vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $>$ $\ast$data, float $\ast$bounds=N\-U\-L\-L)
+\item 
+void \hyperlink{classKDTree_ac78f5936a47f871208bc2c85f33f1e83}{construct} (points $\ast$adata, float $\ast$abounds=N\-U\-L\-L)
+\item 
+void \hyperlink{classKDTree_a3f9325577ee126f3cdab502d0196bd1d}{insert} (\hyperlink{structPoint}{Point}$<$ D $>$ $\ast$point)
+\item 
+\hyperlink{structPoint}{Point}$<$ D $>$ $\ast$ \hyperlink{classKDTree_a5c1d096debead83854736ee964ed813a}{nearest\-Neighbor} (const \hyperlink{structPoint}{Point}$<$ D $>$ $\ast$query)
+\item 
+vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $\ast$ $>$ \hyperlink{classKDTree_aee22752312318bdcdc2c9eb9507f103f}{k\-Nearest\-Neighbors} (const \hyperlink{structPoint}{Point}$<$ D $>$ $\ast$query, const int k)
+\item 
+vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $\ast$ $>$ \hyperlink{classKDTree_ae64d4d34b6b974f425fe73e910335785}{circular\-Query} (const \hyperlink{structPoint}{Point}$<$ D $>$ $\ast$query, const float radius)
+\item 
+\hyperlink{structPoint}{Point}$<$ D $>$ $\ast$ \hyperlink{classKDTree_ad3c1911db577924d55b01d1ad4a53585}{simple\-Nearest\-Neighbor} (const \hyperlink{structPoint}{Point}$<$ D $>$ $\ast$query)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$const int D = 3$>$class K\-D\-Tree$<$ D $>$}
+
+kd-\/tree! 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classKDTree_af8220208eafa9aaacd41164507870fba}{\index{K\-D\-Tree@{K\-D\-Tree}!K\-D\-Tree@{K\-D\-Tree}}
+\index{K\-D\-Tree@{K\-D\-Tree}!KDTree@{K\-D\-Tree}}
+\subsubsection[{K\-D\-Tree}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf K\-D\-Tree}$<$ D $>$\-::{\bf K\-D\-Tree} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_af8220208eafa9aaacd41164507870fba}
+Creates empty kd-\/tree \hypertarget{classKDTree_aa4bae329f2bdbb5ed8ce89070c43078c}{\index{K\-D\-Tree@{K\-D\-Tree}!$\sim$\-K\-D\-Tree@{$\sim$\-K\-D\-Tree}}
+\index{$\sim$\-K\-D\-Tree@{$\sim$\-K\-D\-Tree}!KDTree@{K\-D\-Tree}}
+\subsubsection[{$\sim$\-K\-D\-Tree}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf K\-D\-Tree}$<$ D $>$\-::$\sim${\bf K\-D\-Tree} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_aa4bae329f2bdbb5ed8ce89070c43078c}
+Destructor 
+
+\subsection{Member Function Documentation}
+\hypertarget{classKDTree_ae64d4d34b6b974f425fe73e910335785}{\index{K\-D\-Tree@{K\-D\-Tree}!circular\-Query@{circular\-Query}}
+\index{circular\-Query@{circular\-Query}!KDTree@{K\-D\-Tree}}
+\subsubsection[{circular\-Query}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ vector$<$ {\bf Point}$<$D$>$ $\ast$ $>$ {\bf K\-D\-Tree}$<$ D $>$\-::circular\-Query (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point}$<$ D $>$ $\ast$}]{query, }
+\item[{const float}]{radius}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_ae64d4d34b6b974f425fe73e910335785}
+Returns all points in a hypersphere around given point
+
+Basicaly similar implementation to N\-N, except there is a fixed radius, so no distance revisions
+
+T\-O\-D\-O\-: most parts are very simliar to N\-N search, consider refactoring to avoid code duplicity
+
+
+\begin{DoxyParams}{Parameters}
+{\em query} & center of the sphere \\
+\hline
+{\em radius} & radius of the sphere \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+list of points inside 
+\end{DoxyReturn}
+if right child exist \&\& it has not been searchd yet
+
+if left child exist \&\& it has not been searchd yet
+
+B\-O\-B test \hypertarget{classKDTree_af3a771134ab1e1c1cf86f8c408c19371}{\index{K\-D\-Tree@{K\-D\-Tree}!construct@{construct}}
+\index{construct@{construct}!KDTree@{K\-D\-Tree}}
+\subsubsection[{construct}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ void {\bf K\-D\-Tree}$<$ D $>$\-::construct (
+\begin{DoxyParamCaption}
+\item[{vector$<$ {\bf Point}$<$ D $>$ $>$ $\ast$}]{data, }
+\item[{float $\ast$}]{bounds = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_af3a771134ab1e1c1cf86f8c408c19371}
+Builds the K\-D-\/\-Tree on a given set of unordered points
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em data} & vector of unordered points \\
+\hline
+\mbox{\tt in}  & {\em bounds} & array with bounds of the coordinates \textbackslash{} expects array like this -\/ 2\-D\-: \mbox{[}xmin, xmax, ymin, ymax\mbox{]} \\
+\hline
+\end{DoxyParams}
+\hypertarget{classKDTree_ac78f5936a47f871208bc2c85f33f1e83}{\index{K\-D\-Tree@{K\-D\-Tree}!construct@{construct}}
+\index{construct@{construct}!KDTree@{K\-D\-Tree}}
+\subsubsection[{construct}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ void {\bf K\-D\-Tree}$<$ D $>$\-::construct (
+\begin{DoxyParamCaption}
+\item[{points $\ast$}]{adata, }
+\item[{float $\ast$}]{abounds = {\ttfamily NULL}}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_ac78f5936a47f871208bc2c85f33f1e83}
+Builds the K\-D-\/\-Tree on a given set of points with unknown bounds
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em data} & vector of pointers to unordered points \\
+\hline
+\mbox{\tt in}  & {\em bounds} & array with bounds of the coordinates \textbackslash{} expects array like this -\/ 2\-D\-: \mbox{[}xmin, xmax, ymin, ymax\mbox{]} \\
+\hline
+\end{DoxyParams}
+\hypertarget{classKDTree_aab6b366c8f0ec6e2a1a9aa1854ee8439}{\index{K\-D\-Tree@{K\-D\-Tree}!get\-Bounding\-Box@{get\-Bounding\-Box}}
+\index{get\-Bounding\-Box@{get\-Bounding\-Box}!KDTree@{K\-D\-Tree}}
+\subsubsection[{get\-Bounding\-Box}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ const float$\ast$ {\bf K\-D\-Tree}$<$ D $>$\-::get\-Bounding\-Box (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_aab6b366c8f0ec6e2a1a9aa1854ee8439}
+Bounding box of the tree \begin{DoxyReturn}{Returns}
+array of size 2\-D, format\-: xmin, xmax, ymin, ymax, ... 
+\end{DoxyReturn}
+\hypertarget{classKDTree_ad1ffc917a93f765773dbf3747ae9c7d0}{\index{K\-D\-Tree@{K\-D\-Tree}!get\-Root@{get\-Root}}
+\index{get\-Root@{get\-Root}!KDTree@{K\-D\-Tree}}
+\subsubsection[{get\-Root}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ const {\bf Inner}$\ast$ {\bf K\-D\-Tree}$<$ D $>$\-::get\-Root (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_ad1ffc917a93f765773dbf3747ae9c7d0}
+Returns the root of the tree \begin{DoxyReturn}{Returns}
+pointer to the root node 
+\end{DoxyReturn}
+\hypertarget{classKDTree_a8e2b12172d5b99ddcbd4d20cbf81d321}{\index{K\-D\-Tree@{K\-D\-Tree}!get\-Visited\-Nodes@{get\-Visited\-Nodes}}
+\index{get\-Visited\-Nodes@{get\-Visited\-Nodes}!KDTree@{K\-D\-Tree}}
+\subsubsection[{get\-Visited\-Nodes}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ const int {\bf K\-D\-Tree}$<$ D $>$\-::get\-Visited\-Nodes (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_a8e2b12172d5b99ddcbd4d20cbf81d321}
+Returns the number of visited nodes during last search \begin{DoxyReturn}{Returns}
+number of visited nodes 
+\end{DoxyReturn}
+\hypertarget{classKDTree_a3f9325577ee126f3cdab502d0196bd1d}{\index{K\-D\-Tree@{K\-D\-Tree}!insert@{insert}}
+\index{insert@{insert}!KDTree@{K\-D\-Tree}}
+\subsubsection[{insert}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ void {\bf K\-D\-Tree}$<$ D $>$\-::insert (
+\begin{DoxyParamCaption}
+\item[{{\bf Point}$<$ D $>$ $\ast$}]{point}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_a3f9325577ee126f3cdab502d0196bd1d}
+Inserts point into the tree 
+\begin{DoxyParams}{Parameters}
+{\em point} & point to insert \\
+\hline
+\end{DoxyParams}
+\hypertarget{classKDTree_aee22752312318bdcdc2c9eb9507f103f}{\index{K\-D\-Tree@{K\-D\-Tree}!k\-Nearest\-Neighbors@{k\-Nearest\-Neighbors}}
+\index{k\-Nearest\-Neighbors@{k\-Nearest\-Neighbors}!KDTree@{K\-D\-Tree}}
+\subsubsection[{k\-Nearest\-Neighbors}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ vector$<$ {\bf Point}$<$D$>$ $\ast$ $>$ {\bf K\-D\-Tree}$<$ D $>$\-::k\-Nearest\-Neighbors (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point}$<$ D $>$ $\ast$}]{query, }
+\item[{const int}]{k}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_aee22752312318bdcdc2c9eb9507f103f}
+Returns exact k-\/nearest neighbors (k\-N\-N). 
+\begin{DoxyParams}{Parameters}
+{\em query} & the point whose k\-N\-N we search \\
+\hline
+{\em k} & the number of points we look for \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of k\-N\-N 
+\end{DoxyReturn}
+\hypertarget{classKDTree_a5c1d096debead83854736ee964ed813a}{\index{K\-D\-Tree@{K\-D\-Tree}!nearest\-Neighbor@{nearest\-Neighbor}}
+\index{nearest\-Neighbor@{nearest\-Neighbor}!KDTree@{K\-D\-Tree}}
+\subsubsection[{nearest\-Neighbor}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf Point}$<$D$>$$\ast$ {\bf K\-D\-Tree}$<$ D $>$\-::nearest\-Neighbor (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point}$<$ D $>$ $\ast$}]{query}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_a5c1d096debead83854736ee964ed813a}
+Returns the exact nearest neighbor (N\-N). If there are more N\-Ns, method retuns one random. 
+\begin{DoxyParams}{Parameters}
+{\em query} & the point whose N\-N we search \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+nearest neigbor 
+\end{DoxyReturn}
+squared distance of the current nearest neigbor
+
+current best N\-N
+
+if right child exist \&\& it has not been searchd yet
+
+if left child exist \&\& it has not been searchd yet
+
+B\-O\-B test \hypertarget{classKDTree_ad3c1911db577924d55b01d1ad4a53585}{\index{K\-D\-Tree@{K\-D\-Tree}!simple\-Nearest\-Neighbor@{simple\-Nearest\-Neighbor}}
+\index{simple\-Nearest\-Neighbor@{simple\-Nearest\-Neighbor}!KDTree@{K\-D\-Tree}}
+\subsubsection[{simple\-Nearest\-Neighbor}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf Point}$<$D$>$$\ast$ {\bf K\-D\-Tree}$<$ D $>$\-::simple\-Nearest\-Neighbor (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point}$<$ D $>$ $\ast$}]{query}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_ad3c1911db577924d55b01d1ad4a53585}
+!! This is just to compare the performance with the better version !!
+
+Returns the exact nearest neighbor (N\-N). If there are more N\-Ns, method retuns one random. 
+\begin{DoxyParams}{Parameters}
+{\em query} & the point whose N\-N we search \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+nearest neigbor 
+\end{DoxyReturn}
+\hypertarget{classKDTree_accfe9020b6c62da899799e704e7b336a}{\index{K\-D\-Tree@{K\-D\-Tree}!size@{size}}
+\index{size@{size}!KDTree@{K\-D\-Tree}}
+\subsubsection[{size}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ const int {\bf K\-D\-Tree}$<$ D $>$\-::size (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{classKDTree_accfe9020b6c62da899799e704e7b336a}
+Returns number of points in the tree \begin{DoxyReturn}{Returns}
+number of points in the tree 
+\end{DoxyReturn}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+K\-D\-Tree.\-h\end{DoxyCompactItemize}

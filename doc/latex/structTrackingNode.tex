@@ -1,0 +1,99 @@
+\hypertarget{structTrackingNode}{\section{Tracking\-Node$<$ D $>$ Struct Template Reference}
+\label{structTrackingNode}\index{Tracking\-Node$<$ D $>$@{Tracking\-Node$<$ D $>$}}
+}
+
+
+{\ttfamily \#include $<$K\-D\-Tree\-Nodes.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structTrackingNode_a267a71b15b0d843cbc902f9ea9e635d9}{Tracking\-Node} ()
+\item 
+\hypertarget{structTrackingNode_a8c289f42757184dc677a2f0911356c23}{const float \& {\bfseries operator\mbox{[}$\,$\mbox{]}} (int idx) const }\label{structTrackingNode_a8c289f42757184dc677a2f0911356c23}
+
+\item 
+void \hyperlink{structTrackingNode_ab7fb5d23dd3b6f976343ba19f42d9362}{set} (int d, float val)
+\item 
+float \hyperlink{structTrackingNode_a91fde5eefbd042ba4f71fc8c427b4728}{get\-Updated\-Length} (int d, float val) const 
+\item 
+float \hyperlink{structTrackingNode_a696ade4b521be9a03a139550ce6eb5ea}{get\-Length} () const 
+\item 
+float \hyperlink{structTrackingNode_a1625e77884398a094ab0f2a1270b363b}{get\-Length\-Square} () const 
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$const int D = 3$>$struct Tracking\-Node$<$ D $>$}
+
+Object that keeps track of the distance coverd from N\-N query. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{structTrackingNode_a267a71b15b0d843cbc902f9ea9e635d9}{\index{Tracking\-Node@{Tracking\-Node}!Tracking\-Node@{Tracking\-Node}}
+\index{Tracking\-Node@{Tracking\-Node}!TrackingNode@{Tracking\-Node}}
+\subsubsection[{Tracking\-Node}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf Tracking\-Node}$<$ D $>$\-::{\bf Tracking\-Node} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{structTrackingNode_a267a71b15b0d843cbc902f9ea9e635d9}
+Constructior 
+
+\subsection{Member Function Documentation}
+\hypertarget{structTrackingNode_a696ade4b521be9a03a139550ce6eb5ea}{\index{Tracking\-Node@{Tracking\-Node}!get\-Length@{get\-Length}}
+\index{get\-Length@{get\-Length}!TrackingNode@{Tracking\-Node}}
+\subsubsection[{get\-Length}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ float {\bf Tracking\-Node}$<$ D $>$\-::get\-Length (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{structTrackingNode_a696ade4b521be9a03a139550ce6eb5ea}
+Returns the length from the query \begin{DoxyReturn}{Returns}
+length 
+\end{DoxyReturn}
+\hypertarget{structTrackingNode_a1625e77884398a094ab0f2a1270b363b}{\index{Tracking\-Node@{Tracking\-Node}!get\-Length\-Square@{get\-Length\-Square}}
+\index{get\-Length\-Square@{get\-Length\-Square}!TrackingNode@{Tracking\-Node}}
+\subsubsection[{get\-Length\-Square}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ float {\bf Tracking\-Node}$<$ D $>$\-::get\-Length\-Square (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{structTrackingNode_a1625e77884398a094ab0f2a1270b363b}
+Returns the sqared length from the query \begin{DoxyReturn}{Returns}
+length square 
+\end{DoxyReturn}
+\hypertarget{structTrackingNode_a91fde5eefbd042ba4f71fc8c427b4728}{\index{Tracking\-Node@{Tracking\-Node}!get\-Updated\-Length@{get\-Updated\-Length}}
+\index{get\-Updated\-Length@{get\-Updated\-Length}!TrackingNode@{Tracking\-Node}}
+\subsubsection[{get\-Updated\-Length}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ float {\bf Tracking\-Node}$<$ D $>$\-::get\-Updated\-Length (
+\begin{DoxyParamCaption}
+\item[{int}]{d, }
+\item[{float}]{val}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{structTrackingNode_a91fde5eefbd042ba4f71fc8c427b4728}
+Similar to set, except it only returns length and doesn't modify the object. It'm using it to avoid creatin new objects on stack if it's not necessary. 
+\begin{DoxyParams}{Parameters}
+{\em d} & dimension \\
+\hline
+{\em val} & value to change \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+squared length 
+\end{DoxyReturn}
+\hypertarget{structTrackingNode_ab7fb5d23dd3b6f976343ba19f42d9362}{\index{Tracking\-Node@{Tracking\-Node}!set@{set}}
+\index{set@{set}!TrackingNode@{Tracking\-Node}}
+\subsubsection[{set}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ void {\bf Tracking\-Node}$<$ D $>$\-::set (
+\begin{DoxyParamCaption}
+\item[{int}]{d, }
+\item[{float}]{val}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{structTrackingNode_ab7fb5d23dd3b6f976343ba19f42d9362}
+Sets value in given dimension to given length 
+\begin{DoxyParams}{Parameters}
+{\em d} & dimension \\
+\hline
+{\em val} & length \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+K\-D\-Tree\-Nodes.\-h\end{DoxyCompactItemize}

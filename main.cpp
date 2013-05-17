@@ -22,80 +22,67 @@ using namespace std;
 /** Data dimension */
 #define D 2
 /** Folder for output data */
-const string output_dir = "/home/jaa/.wine/drive_c/data/";
+const string output_dir = "./";///home/jaa/.wine/drive_c/data/";
 
 ///FORWARD DECLARATIONS:
 /** distance calculations for naiveNN function*/
 const float distance(const Point<D> * p1, const Point<D>& p2);
-
 /** naive NN, search NN by iteration over all points */
 Point<D> * naiveNN(Point<D> * query, vector< Point<D> > *data);
-
 /** tests if kd-tree nearest neigbor returns the smae as naive NN */
 void testNNCorrectness(float * bounds);
-
 /** test if sliding midpoint works ok */
 void testSlidingMidPoint();
-
 /** compares optimized and simeple NN in kd-tree*/
 void compareNNandSimple();
-
 /** does circular query on data and prints data to output folder */
 void printCircularQuery(float * bounds);
-
 /** does kNearest query and prits data to output folder */
-void printKNearest(float * bounds);
-
+void printKNearest();
 /** prints tree (colored buckets) + splitting lines */
 void printBuckets();
-
 /** runs a lot of circular queries for profiling */
 void runCircular(float * bounds);
-
 /** runs a lot of knn queries for profiling */
 void runKNN(float * bounds);
-
 /** runs a lot of nn queries for profiling */
 void runNN(float * bounds);
-
 /** compare time of NN search based on data distribution */
-void compareNNonDatasets();
-
+void compareNNonDatasets(string path);
 /** counts the number of visited nodes per search */
 void countVisitedNodes();
-
 /** prints kNN on real data */
 void printKnnOnRealData();
+
 
 int main(int argc, char *argv[]) {
     
     float bounds[2*5] = {0.f, 10.f, 0.f, 12.f, 0.f, 10.f, 1.f, 3.f, 3.f, 9.f};
     
-    //compareNNandSimple();
-    //compareNNonDatasets();
-    
-    printKNearest(bounds);
-    //printCircularQuery(bounds);
-    //printBuckets();
-    //printKnnOnRealData();
-    
-    //testNNCorrectness(bounds);
-    //testSlidingMidPoint();
-    
-    //countVisitedNodes();
-    
-    //runNN(bounds);
-    //runCircular(bounds);
-    //runKNN(bounds);
+//    compareNNandSimple();
+//    compareNNonDatasets("/home/jaa/Dokumenty/FEL/BP/modely/stodulky/");
+//    
+      printKNearest();
+//    printCircularQuery(bounds);
+//    printBuckets();
+//    printKnnOnRealData();
+//    
+//    testNNCorrectness(bounds);
+//    testSlidingMidPoint();
+//    
+//    countVisitedNodes();
+//    
+//    runNN(bounds);
+//    runCircular(bounds);
+//    runKNN(bounds);
      
     return 0;
-    
 }
 
 
 void printKnnOnRealData() {
     vector< Point<D> > points;
-    string path = "/home/jaa/Dokumenty/FEL/BP/modely/cervena_lhota/";
+    string path = "../data/stodulky/";//home/jaa/Dokumenty/FEL/BP/modely/stodulky/";
         
     DIR *dir;
     struct dirent *ent;
@@ -146,9 +133,8 @@ void countVisitedNodes() {
     
 }
 
-void compareNNonDatasets() {
+void compareNNonDatasets(string path) {
     vector< Point<D> > points;
-    string path = "/home/jaa/Dokumenty/FEL/BP/modely/stodulky/";
     const int count  = 50000;
         
     struct timeval start, end;
@@ -363,7 +349,8 @@ void printCircularQuery(float * bounds) {
 }
 
 
-void printKNearest(float * bounds) {
+void printKNearest() {
+    cout << "running kNN query of 1300 points on random data, size 100000\n";
     vector< Point<D> > points = PointCloudGen<D>::genGaussDistr(100000);
     
     KDTree<D> kdtree;

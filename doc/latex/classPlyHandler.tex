@@ -1,0 +1,81 @@
+\hypertarget{classPlyHandler}{\section{Ply\-Handler Class Reference}
+\label{classPlyHandler}\index{Ply\-Handler@{Ply\-Handler}}
+}
+
+
+{\ttfamily \#include $<$Ply\-Handler.\-h$>$}
+
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$const int D$>$ }\\static vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $>$ \hyperlink{classPlyHandler_a125b6822706e4f4da1349f4e1aa11a53}{load} (string file)
+\item 
+{\footnotesize template$<$const int D$>$ }\\static void \hyperlink{classPlyHandler_a1ae0c0c8a36138646795af8e6215c609}{save\-Points} (string file, vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $>$ data)
+\item 
+{\footnotesize template$<$const int D$>$ }\\static void \hyperlink{classPlyHandler_a444313ab537951a9f4845d6cedc238f3}{save\-Lines} (string file, vector$<$ \hyperlink{structPoint}{Point}$<$ D $>$ $>$ data)
+\item 
+{\footnotesize template$<$const int D$>$ }\\static void \hyperlink{classPlyHandler_a81e659f8981caa1581db8389be2f06c6}{save\-Window} (float $\ast$window)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Basic work with ply files for point data 
+
+\subsection{Member Function Documentation}
+\hypertarget{classPlyHandler_a125b6822706e4f4da1349f4e1aa11a53}{\index{Ply\-Handler@{Ply\-Handler}!load@{load}}
+\index{load@{load}!PlyHandler@{Ply\-Handler}}
+\subsubsection[{load}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D$>$ static vector$<$ {\bf Point}$<$D$>$ $>$ Ply\-Handler\-::load (
+\begin{DoxyParamCaption}
+\item[{string}]{file}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classPlyHandler_a125b6822706e4f4da1349f4e1aa11a53}
+Loads set of point from ply file Note that this is not very general and handles files with points 
+\begin{DoxyParams}{Parameters}
+{\em file} & path to file \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+vector of points 
+\end{DoxyReturn}
+\hypertarget{classPlyHandler_a444313ab537951a9f4845d6cedc238f3}{\index{Ply\-Handler@{Ply\-Handler}!save\-Lines@{save\-Lines}}
+\index{save\-Lines@{save\-Lines}!PlyHandler@{Ply\-Handler}}
+\subsubsection[{save\-Lines}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D$>$ static void Ply\-Handler\-::save\-Lines (
+\begin{DoxyParamCaption}
+\item[{string}]{file, }
+\item[{vector$<$ {\bf Point}$<$ D $>$ $>$}]{data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classPlyHandler_a444313ab537951a9f4845d6cedc238f3}
+Saves lines from given coordinates 
+\begin{DoxyParams}{Parameters}
+{\em file} & file name \\
+\hline
+{\em data} & set points defining lines \\
+\hline
+\end{DoxyParams}
+\hypertarget{classPlyHandler_a1ae0c0c8a36138646795af8e6215c609}{\index{Ply\-Handler@{Ply\-Handler}!save\-Points@{save\-Points}}
+\index{save\-Points@{save\-Points}!PlyHandler@{Ply\-Handler}}
+\subsubsection[{save\-Points}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D$>$ static void Ply\-Handler\-::save\-Points (
+\begin{DoxyParamCaption}
+\item[{string}]{file, }
+\item[{vector$<$ {\bf Point}$<$ D $>$ $>$}]{data}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classPlyHandler_a1ae0c0c8a36138646795af8e6215c609}
+Saves points to P\-L\-Y file 
+\begin{DoxyParams}{Parameters}
+{\em file} & file name \\
+\hline
+{\em data} & points \\
+\hline
+\end{DoxyParams}
+\hypertarget{classPlyHandler_a81e659f8981caa1581db8389be2f06c6}{\index{Ply\-Handler@{Ply\-Handler}!save\-Window@{save\-Window}}
+\index{save\-Window@{save\-Window}!PlyHandler@{Ply\-Handler}}
+\subsubsection[{save\-Window}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D$>$ static void Ply\-Handler\-::save\-Window (
+\begin{DoxyParamCaption}
+\item[{float $\ast$}]{window}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [static]}}}\label{classPlyHandler_a81e659f8981caa1581db8389be2f06c6}
+Debug 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Ply\-Handler.\-h\end{DoxyCompactItemize}

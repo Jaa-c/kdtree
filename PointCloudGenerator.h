@@ -84,7 +84,7 @@ public:
 		float u2 = ((float) rand()) / (float) RAND_MAX;
 
 		p1[d] = sqrt(-2 * log(u1)) * sin(2 * pi * u2);
-		p2[d] z2 = sqrt(-2 * log(u1)) * cos(2 * pi * u2);
+		p2[d] = sqrt(-2 * log(u1)) * cos(2 * pi * u2);
 	    }
 	    points.push_back(p1);
 	    points.push_back(p2);

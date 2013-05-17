@@ -402,7 +402,7 @@ public:
 	//find nearest point in the bucket
 	for(points_it it = leaf->bucket.begin(); it != leaf->bucket.end(); ++it) {
 	    visitedNodes++;
-	    (*it)->setColor(0, 255, 0);
+	    //(*it)->setColor(0, 255, 0); //debug
 	    float tmp = distance(query, *it);
 	    if(tmp < dist && tmp > 0) { //ie points are not the same!
 		dist = tmp;

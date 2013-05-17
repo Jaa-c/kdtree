@@ -1,0 +1,145 @@
+\hypertarget{structPoint}{\section{Point$<$ D $>$ Struct Template Reference}
+\label{structPoint}\index{Point$<$ D $>$@{Point$<$ D $>$}}
+}
+
+
+{\ttfamily \#include $<$Point.\-h$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structPoint_aeee1908b65777b39f4caf849b7cb8ecb}{Point} ()
+\item 
+\hyperlink{structPoint_a6af9739117ba5896753f570b8bcc7846}{Point} (float $\ast$co)
+\item 
+\hyperlink{structPoint_a42b2c2ba9a7dea4003c012e8e5fea625}{Point} (const \hyperlink{structPoint}{Point}$<$ D $>$ \&point)
+\item 
+void \hyperlink{structPoint_a5fb0754a95e46f76180141105b160e1b}{set\-Color} (int r, int g, int b)
+\item 
+\hypertarget{structPoint_a9aa4a8ba953e7d36e2c8c68059ac1c36}{\hyperlink{structPoint}{Point} \& {\bfseries operator=} (const \hyperlink{structPoint}{Point}$<$ D $>$ \&point)}\label{structPoint_a9aa4a8ba953e7d36e2c8c68059ac1c36}
+
+\item 
+float \& \hyperlink{structPoint_a1a7e8252e8d428d8b2cf0a802d00c687}{operator\mbox{[}$\,$\mbox{]}} (int idx)
+\item 
+const float \& \hyperlink{structPoint_a1cb1045aa734303c07625ecba927fa84}{operator\mbox{[}$\,$\mbox{]}} (int idx) const 
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{structPoint_a7d7d156cc3315dbb82aa63df013f97cc}{float {\bfseries coords} \mbox{[}D\mbox{]}}\label{structPoint_a7d7d156cc3315dbb82aa63df013f97cc}
+
+\item 
+\hypertarget{structPoint_a87acdec6769f31eba5eb1754495fb7da}{int {\bfseries color} \mbox{[}3\mbox{]}}\label{structPoint_a87acdec6769f31eba5eb1754495fb7da}
+
+\end{DoxyCompactItemize}
+\subsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+std\-::ostream \& \hyperlink{structPoint_aa818efa680e0d94ce91173ccb4b7aa08}{operator$<$$<$} (std\-::ostream \&out, const \hyperlink{structPoint}{Point} \&p)
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\subsubsection*{template$<$const int D = 3$>$struct Point$<$ D $>$}
+
+Simple point with coordinates and color 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{structPoint_aeee1908b65777b39f4caf849b7cb8ecb}{\index{Point@{Point}!Point@{Point}}
+\index{Point@{Point}!Point@{Point}}
+\subsubsection[{Point}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf Point}$<$ D $>$\-::{\bf Point} (
+\begin{DoxyParamCaption}
+{}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{structPoint_aeee1908b65777b39f4caf849b7cb8ecb}
+Creates black point with no coordinates \hypertarget{structPoint_a6af9739117ba5896753f570b8bcc7846}{\index{Point@{Point}!Point@{Point}}
+\index{Point@{Point}!Point@{Point}}
+\subsubsection[{Point}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf Point}$<$ D $>$\-::{\bf Point} (
+\begin{DoxyParamCaption}
+\item[{float $\ast$}]{co}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{structPoint_a6af9739117ba5896753f570b8bcc7846}
+Creates the point with given coordinates 
+\begin{DoxyParams}{Parameters}
+{\em co} & array of coordinates \\
+\hline
+\end{DoxyParams}
+\hypertarget{structPoint_a42b2c2ba9a7dea4003c012e8e5fea625}{\index{Point@{Point}!Point@{Point}}
+\index{Point@{Point}!Point@{Point}}
+\subsubsection[{Point}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ {\bf Point}$<$ D $>$\-::{\bf Point} (
+\begin{DoxyParamCaption}
+\item[{const {\bf Point}$<$ D $>$ \&}]{point}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{structPoint_a42b2c2ba9a7dea4003c012e8e5fea625}
+Copy constructor 
+\begin{DoxyParams}{Parameters}
+{\em point} & original object \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{structPoint_a1a7e8252e8d428d8b2cf0a802d00c687}{\index{Point@{Point}!operator\mbox{[}$\,$\mbox{]}@{operator[]}}
+\index{operator\mbox{[}$\,$\mbox{]}@{operator[]}!Point@{Point}}
+\subsubsection[{operator[]}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ float\& {\bf Point}$<$ D $>$\-::operator\mbox{[}$\,$\mbox{]} (
+\begin{DoxyParamCaption}
+\item[{int}]{idx}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{structPoint_a1a7e8252e8d428d8b2cf0a802d00c687}
+Access to point coordinates 
+\begin{DoxyParams}{Parameters}
+{\em idx} & dimension \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+coordinate 
+\end{DoxyReturn}
+\hypertarget{structPoint_a1cb1045aa734303c07625ecba927fa84}{\index{Point@{Point}!operator\mbox{[}$\,$\mbox{]}@{operator[]}}
+\index{operator\mbox{[}$\,$\mbox{]}@{operator[]}!Point@{Point}}
+\subsubsection[{operator[]}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ const float\& {\bf Point}$<$ D $>$\-::operator\mbox{[}$\,$\mbox{]} (
+\begin{DoxyParamCaption}
+\item[{int}]{idx}
+\end{DoxyParamCaption}
+) const\hspace{0.3cm}{\ttfamily [inline]}}}\label{structPoint_a1cb1045aa734303c07625ecba927fa84}
+Access to point coordinates 
+\begin{DoxyParams}{Parameters}
+{\em idx} & dimension \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+coordinate 
+\end{DoxyReturn}
+\hypertarget{structPoint_a5fb0754a95e46f76180141105b160e1b}{\index{Point@{Point}!set\-Color@{set\-Color}}
+\index{set\-Color@{set\-Color}!Point@{Point}}
+\subsubsection[{set\-Color}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ void {\bf Point}$<$ D $>$\-::set\-Color (
+\begin{DoxyParamCaption}
+\item[{int}]{r, }
+\item[{int}]{g, }
+\item[{int}]{b}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [inline]}}}\label{structPoint_a5fb0754a95e46f76180141105b160e1b}
+Sets point color 
+\begin{DoxyParams}{Parameters}
+{\em r} & red \\
+\hline
+{\em g} & green \\
+\hline
+{\em b} & blue \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Friends And Related Function Documentation}
+\hypertarget{structPoint_aa818efa680e0d94ce91173ccb4b7aa08}{\index{Point@{Point}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!Point@{Point}}
+\subsubsection[{operator$<$$<$}]{\setlength{\rightskip}{0pt plus 5cm}template$<$const int D = 3$>$ std\-::ostream\& operator$<$$<$ (
+\begin{DoxyParamCaption}
+\item[{std\-::ostream \&}]{out, }
+\item[{const {\bf Point}$<$ D $>$ \&}]{p}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [friend]}}}\label{structPoint_aa818efa680e0d94ce91173ccb4b7aa08}
+Debug 
+
+The documentation for this struct was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Point.\-h\end{DoxyCompactItemize}
